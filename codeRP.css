@@ -19,3 +19,15 @@ lise {
   color: var(--dialog-lise);
   font-weight: bold;
 }
+
+lise:before {
+  content: "« ";
+  color: var(--txt-noir-neutre);
+  font-weight: initial;
+}
+
+lise:after {
+  content: " »";
+  color: var(--txt-noir-neutre);
+  font-weight: initial;
+}
