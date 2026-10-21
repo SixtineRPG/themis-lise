@@ -1,9 +1,9 @@
 :root {
-  --dialog-lise: red;
+  --dialog-lise: #80AE77;
 }
 
 html.night-mode {
-  --dialog-lise: blue;
+  --dialog-lise: #80AE77;
 }
 
 .textRP__Lise {
