@@ -1,0 +1,21 @@
+:root {
+  --dialog-lise: red;
+}
+
+html.night-mode {
+  --dialog-lise: blue;
+}
+
+.textRP__Lise {
+  font-size: 18px;
+  display: flex;
+  justify-content: center;
+}
+.textRP__Lise p {
+  max-width: 800px;
+}
+
+lise {
+  color: var(--dialog-lise);
+  font-weight: bold;
+}
