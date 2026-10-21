@@ -7,12 +7,12 @@ html.night-mode {
 }
 
 .textRP__Lise {
-  font-size: 18px;
   display: flex;
   justify-content: center;
 }
 .textRP__Lise p {
   max-width: 800px;
+  font-size: 16px;
 }
 
 lise {
