@@ -33,6 +33,9 @@
       </section>
     </sidebar>
     <main class="container">
+      <button type="button" id="synchroniser-sheets">
+  Synchroniser Google Sheets
+</button>
       <!-- <section class="talents__filters" aria-label="Filtres">
         <label class="talents__search">
           <span class="talents__label">Rechercher</span>
@@ -73,6 +76,28 @@
         details.setAttribute("aria-hidden", String(!isOpen));
         details.inert = !isOpen;
       });
+    </script>
+    <script>
+      // ==========================================================
+// SYNCHRONISATION GOOGLE SHEETS
+// ==========================================================
+
+const GOOGLE_SHEETS_API_URL = "TON_URL_APPS_SCRIPT";
+
+const synchroniserButton = document.querySelector("#synchroniser-sheets");
+const synchroniserMessage = document.querySelector("#synchroniser-message");
+
+synchroniserButton.addEventListener("click", () => {
+  synchroniserButton.disabled = true;
+  synchroniserMessage.textContent = "Synchronisation en cours...";
+
+  const url = `${GOOGLE_SHEETS_API_URL}?action=synchroniser`;
+
+  window.open(url, "_blank");
+
+  synchroniserButton.disabled = false;
+  synchroniserMessage.textContent = "Requête envoyée à Google Apps Script.";
+});
     </script>
   </body>
 </html>
