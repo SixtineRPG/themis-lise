@@ -598,43 +598,8 @@ function renderTalentsJoueurs(members, talents, distributions) {
     .join("");
 }
 
+
 // ==========================================================
-// GÉNÉRATION ALÉATOIRE D'OBJETS
-// ==========================================================
-
-talentsJoueurs.addEventListener("click", (event) => {
-  const button = event.target.closest(".talents__generer");
-
-  if (!button) return;
-
-  const objet = getRandomObject(button.dataset.category, objetsData);
-
-  if (!objet) {
-    button.textContent = "Aucun objet disponible";
-    button.disabled = true;
-    return;
-  }
-
-  button.outerHTML = `
-    <div class="talents__objet-result">
-      ${
-        objet.image
-          ? `<img
-              class="talents__objet-image"
-              src="${escapeHtml(objet.image)}"
-              alt="${escapeHtml(objet.nom)}"
-            >`
-          : ""
-      }
-
-      <span class="talents__objet-name">
-        ${escapeHtml(objet.nom)}
-      </span>
-    </div>
-  `;
-});
-
-      // ==========================================================
 // MODIFICATIONS NON ENREGISTRÉES
 // ==========================================================
 
@@ -669,6 +634,62 @@ window.addEventListener("beforeunload", (event) => {
 
   event.preventDefault();
   event.returnValue = "";
+});
+
+
+// ==========================================================
+// GÉNÉRATION ALÉATOIRE D'OBJETS
+// ==========================================================
+
+talentsJoueurs.addEventListener("click", (event) => {
+  const button = event.target.closest(".talents__generer");
+
+  if (!button) return;
+
+  const objet = getRandomObject(button.dataset.category, objetsData);
+
+  if (!objet) {
+    button.textContent = "Aucun objet disponible";
+    button.disabled = true;
+    return;
+  }
+
+  // = Récupération du joueur et du talent.
+
+  const talent = button.closest(".talents__joueur-talent");
+  const joueur = button.closest(".talents__joueur");
+
+  const joueurId = joueur.dataset.joueurId;
+  const talentName = talent.dataset.talent;
+
+  // = Enregistrement de l'objet à synchroniser.
+
+  marquerModification(`${joueurId}::${talentName}::item`, {
+    type: "item",
+    joueur_id: joueurId,
+    talent: talentName,
+    dernier_item: objet.nom,
+  });
+
+  // = Affichage de l'objet généré.
+
+  button.outerHTML = `
+    <div class="talents__objet-result">
+      ${
+        objet.image
+          ? `<img
+              class="talents__objet-image"
+              src="${escapeHtml(objet.image)}"
+              alt="${escapeHtml(objet.nom)}"
+            >`
+          : ""
+      }
+
+      <span class="talents__objet-name">
+        ${escapeHtml(objet.nom)}
+      </span>
+    </div>
+  `;
 });
 
 // ==========================================================
