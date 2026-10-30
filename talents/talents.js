@@ -350,7 +350,7 @@ function renderTalentsJoueurs(members, talents) {
                     const category = TALENTS_OBJETS[normalizeName(talent.nom)];
 
                     return `
-                      <li class="talents__joueur-talent">
+                      <li class="talents__joueur-talent" data-delai="${escapeHtml(config?.delai || "")}">
                         ${
                           talent.icon
                             ? `
@@ -389,11 +389,7 @@ function renderTalentsJoueurs(members, talents) {
                               : ""
                           }
                         </div>
-                        <div class="talents__joueur-talent-reference">
-
-  <div class="talents__joueur-talent-date">
-    <!-- Date à ajouter ultérieurement -->
-  </div>
+<div class="talents__joueur-talent-reference">
 
   <button
     class="talents__joueur-talent-don"
@@ -401,6 +397,32 @@ function renderTalentsJoueurs(members, talents) {
   >
     Donner la récompense
   </button>
+
+  <div class="talents__joueur-talent-date">
+    <label>
+      <i class="fa-regular fa-calendar"></i>
+
+      <input
+        class="talents__joueur-talent-date-input"
+        type="date"
+        aria-label="Date de distribution de ${escapeHtml(talent.nom)}"
+      >
+    </label>
+
+    <button
+      class="talents__joueur-talent-date-submit"
+      type="button"
+    >
+      Valider la date
+    </button>
+  </div>
+
+  <div class="talents__joueur-talent-prochaine">
+    <span>Prochaine distribution</span>
+    <strong class="talents__joueur-talent-prochaine-date">
+      —
+    </strong>
+  </div>
 
 </div>
                       </li>
@@ -450,6 +472,57 @@ talentsJoueurs.addEventListener("click", (event) => {
       </span>
     </div>
   `;
+});
+
+// ==========================================================
+// DATE DE DISTRIBUTION
+// ==========================================================
+
+talentsJoueurs.addEventListener("click", (event) => {
+  const button = event.target.closest(".talents__joueur-talent-date-submit");
+
+  if (!button) return;
+
+  const talent = button.closest(".talents__joueur-talent");
+  const input = talent.querySelector(".talents__joueur-talent-date-input");
+  const output = talent.querySelector(".talents__joueur-talent-prochaine-date");
+
+  if (!input.value) {
+    input.reportValidity();
+    return;
+  }
+
+  // = Récupération de la date.
+
+  const [year, month, day] = input.value.split("-").map(Number);
+  const date = new Date(year, month - 1, day);
+
+  // = Calcul du délai.
+
+  const delai = talent.dataset.delai;
+
+  if (delai === "quinzaine") {
+    date.setDate(date.getDate() + 15);
+  }
+
+  if (delai === "mensuel") {
+    const originalDay = date.getDate();
+
+    date.setDate(1);
+    date.setMonth(date.getMonth() + 1);
+
+    const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+
+    date.setDate(Math.min(originalDay, lastDay));
+  }
+
+  // = Affichage de la prochaine distribution.
+
+  output.textContent = date.toLocaleDateString("fr-FR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
 });
 
 // ==========================================================
