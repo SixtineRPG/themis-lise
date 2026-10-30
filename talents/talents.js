@@ -478,6 +478,43 @@ talentsJoueurs.addEventListener("click", (event) => {
   `;
 });
 
+      // ==========================================================
+// MODIFICATIONS NON ENREGISTRÉES
+// ==========================================================
+
+const modificationsEnAttente = new Map();
+
+const synchroniserCompteur = document.querySelector("#synchroniser-compteur");
+
+// = Enregistrer une modification.
+
+function marquerModification(key, data) {
+  modificationsEnAttente.set(key, data);
+
+  actualiserCompteur();
+}
+
+// = Actualiser le compteur.
+
+function actualiserCompteur() {
+  const count = modificationsEnAttente.size;
+
+  if (!synchroniserCompteur) return;
+
+  synchroniserCompteur.textContent = count > 0
+    ? `${count} modification${count > 1 ? "s" : ""} non enregistrée${count > 1 ? "s" : ""} sur Google Sheets`
+    : "Aucune modification en attente";
+}
+
+// = Avertissement avant de quitter.
+
+window.addEventListener("beforeunload", (event) => {
+  if (modificationsEnAttente.size === 0) return;
+
+  event.preventDefault();
+  event.returnValue = "";
+});
+
 // ==========================================================
 // DATE DE DISTRIBUTION
 // ==========================================================
@@ -549,57 +586,81 @@ marquerModification(`${joueurId}::${talentName}`, {
 
 const GOOGLE_SHEETS_API_URL = "https://script.google.com/macros/s/AKfycby7sfWJyZ_2PMn1gm8MuaHk594uk6_dEUxTEEEV6j5Bo3lp2rgoBhcHPzbMmWSuGjtoGw/exec";
 
+// ==========================================================
+// SYNCHRONISATION GOOGLE SHEETS
+// ==========================================================
+
 const synchroniserButton = document.querySelector("#synchroniser-sheets");
 const synchroniserMessage = document.querySelector("#synchroniser-message");
+const synchroniserFrame = document.querySelector("#synchroniser-frame");
+
+// = Création du formulaire d'envoi.
+
+const synchroniserForm = document.createElement("form");
+
+synchroniserForm.method = "POST";
+synchroniserForm.action = GOOGLE_SHEETS_API_URL;
+synchroniserForm.target = "synchroniser-frame";
+synchroniserForm.hidden = true;
+
+const synchroniserPayload = document.createElement("input");
+
+synchroniserPayload.type = "hidden";
+synchroniserPayload.name = "payload";
+
+synchroniserForm.appendChild(synchroniserPayload);
+document.body.appendChild(synchroniserForm);
+
+// = Envoi des modifications.
 
 synchroniserButton.addEventListener("click", () => {
+  if (modificationsEnAttente.size === 0) {
+    synchroniserMessage.textContent = "Aucune modification à synchroniser.";
+    return;
+  }
+
   synchroniserButton.disabled = true;
   synchroniserMessage.textContent = "Synchronisation en cours...";
 
-  const url = `${GOOGLE_SHEETS_API_URL}?action=synchroniser`;
+  const payload = {
+    requestId: String(Date.now()),
+    modifications: Array.from(modificationsEnAttente.values()),
+  };
 
-  window.open(url, "_blank");
+  synchroniserPayload.value = JSON.stringify(payload);
+
+  synchroniserForm.submit();
+});
+
+// = Réception de la réponse Apps Script.
+
+window.addEventListener("message", (event) => {
+  const allowedOrigins = [
+    "https://script.google.com",
+    "https://script.googleusercontent.com",
+  ];
+
+  if (!allowedOrigins.includes(event.origin)) return;
+
+  const response = event.data;
+
+  if (!response || typeof response !== "object") return;
+
+  if (response.success) {
+    modificationsEnAttente.clear();
+
+    actualiserCompteur();
+
+    synchroniserMessage.textContent = "Synchronisation terminée !";
+  } else {
+    synchroniserMessage.textContent =
+      `Erreur : ${response.message || "Synchronisation impossible."}`;
+  }
 
   synchroniserButton.disabled = false;
-  synchroniserMessage.textContent = "Requête envoyée à Google Apps Script.";
 });
 
-      // ==========================================================
-// MODIFICATIONS NON ENREGISTRÉES
-// ==========================================================
 
-const modificationsEnAttente = new Map();
-
-const synchroniserCompteur = document.querySelector("#synchroniser-compteur");
-
-// = Enregistrer une modification.
-
-function marquerModification(key, data) {
-  modificationsEnAttente.set(key, data);
-
-  actualiserCompteur();
-}
-
-// = Actualiser le compteur.
-
-function actualiserCompteur() {
-  const count = modificationsEnAttente.size;
-
-  if (!synchroniserCompteur) return;
-
-  synchroniserCompteur.textContent = count > 0
-    ? `${count} modification${count > 1 ? "s" : ""} non enregistrée${count > 1 ? "s" : ""} sur Google Sheets`
-    : "Aucune modification en attente";
-}
-
-// = Avertissement avant de quitter.
-
-window.addEventListener("beforeunload", (event) => {
-  if (modificationsEnAttente.size === 0) return;
-
-  event.preventDefault();
-  event.returnValue = "";
-});
 
 // ==========================================================
 // INITIALISATION
