@@ -5,31 +5,39 @@
   <title>Retour synchronisation</title>
 </head>
 <body>
-<script>
-  const params = new URLSearchParams(window.location.search);
-  const syncResponse = params.get("sync");
+  <p id="status">Réception de la réponse...</p>
 
-  console.log("[SYNC CALLBACK] Page chargée");
-  console.log("[SYNC CALLBACK] Réponse reçue :", syncResponse);
+  <script>
+    const status = document.querySelector("#status");
+    const params = new URLSearchParams(window.location.search);
+    const syncResponse = params.get("sync");
 
-  if (syncResponse) {
     try {
+      if (!syncResponse) {
+        throw new Error("Aucune réponse reçue depuis Apps Script.");
+      }
+
       const response = JSON.parse(syncResponse);
 
-      console.log("[SYNC CALLBACK] Réponse décodée :", response);
-      console.log("[SYNC CALLBACK] Parent :", window.parent);
+      status.textContent = "Réponse reçue. Transmission à la page principale...";
 
       window.parent.postMessage(
         response,
         "https://sixtinerpg.github.io"
       );
 
-      console.log("[SYNC CALLBACK] Message envoyé");
+      status.textContent = "Réponse transmise.";
     } catch (error) {
-      console.error("[SYNC CALLBACK] Erreur :", error);
+      status.textContent = `Erreur : ${error.message}`;
+
+      window.parent.postMessage(
+        {
+          success: false,
+          message: error.message
+        },
+        "https://sixtinerpg.github.io"
+      );
     }
-  }
-</script>
+  </script>
 </body>
-  
 </html>
