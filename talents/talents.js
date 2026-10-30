@@ -641,36 +641,31 @@ synchroniserForm.submit();
 // RETOUR DE SYNCHRONISATION
 // ==========================================================
 
-const params = new URLSearchParams(window.location.search);
-const syncResponse = params.get("sync");
+window.addEventListener("message", (event) => {
+  // = Vérifier l'origine et la fenêtre émettrice.
 
-if (syncResponse) {
-  try {
-    const response = JSON.parse(syncResponse);
+  if (event.origin !== "https://sixtinerpg.github.io") return;
+  if (event.source !== synchroniserFrame.contentWindow) return;
 
-    if (response.requestId === synchronisationEnCours) {
-      if (response.success) {
-        modificationsEnAttente.clear();
-        actualiserCompteur();
-        synchroniserMessage.textContent = "Synchronisation terminée !";
-      } else {
-        synchroniserMessage.textContent =
-          `Erreur : ${response.message || "Synchronisation impossible."}`;
-      }
+  const response = event.data;
 
-      synchronisationEnCours = null;
-    }
-  } catch (error) {
-    synchroniserMessage.textContent = "Réponse de synchronisation invalide.";
+  if (!response || typeof response !== "object") return;
+  if (response.requestId !== synchronisationEnCours) return;
+
+  synchronisationEnCours = null;
+
+  if (response.success) {
+    modificationsEnAttente.clear();
+    actualiserCompteur();
+
+    synchroniserMessage.textContent = "Synchronisation terminée !";
+  } else {
+    synchroniserMessage.textContent =
+      `Erreur : ${response.message || "Synchronisation impossible."}`;
   }
 
-  window.history.replaceState(
-    {},
-    document.title,
-    window.location.pathname
-  );
-}
-
+  synchroniserButton.disabled = false;
+});
 
 
 // ==========================================================
