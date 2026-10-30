@@ -3,6 +3,7 @@ const TALENTS_URL = "https://sixtinerpg.github.io/themis-lise/talents/talents.js
 const MEMBERLIST_URL = "https://sixtinerpg.github.io/themis-lise/talents/memberlist_local.json";
 const OBJETS_URL = "https://sixtinerpg.github.io/themis-lise/talents/objets.json";
 
+
 // ==========================================================
 // CONFIGURATION
 // ==========================================================
