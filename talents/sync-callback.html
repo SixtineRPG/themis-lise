@@ -5,28 +5,30 @@
   <title>Retour synchronisation</title>
 </head>
 <body>
-  <script>
-    const params = new URLSearchParams(window.location.search);
-    const syncResponse = params.get("sync");
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const syncResponse = params.get("sync");
 
-    if (syncResponse) {
-      try {
-        const response = JSON.parse(syncResponse);
+  console.log("[SYNC CALLBACK] Page chargée");
+  console.log("[SYNC CALLBACK] Réponse reçue :", syncResponse);
 
-        window.parent.postMessage(
-          response,
-          "https://sixtinerpg.github.io"
-        );
-      } catch (error) {
-        window.parent.postMessage(
-          {
-            success: false,
-            message: "Réponse de synchronisation invalide.",
-          },
-          "https://sixtinerpg.github.io"
-        );
-      }
+  if (syncResponse) {
+    try {
+      const response = JSON.parse(syncResponse);
+
+      console.log("[SYNC CALLBACK] Réponse décodée :", response);
+      console.log("[SYNC CALLBACK] Parent :", window.parent);
+
+      window.parent.postMessage(
+        response,
+        "https://sixtinerpg.github.io"
+      );
+
+      console.log("[SYNC CALLBACK] Message envoyé");
+    } catch (error) {
+      console.error("[SYNC CALLBACK] Erreur :", error);
     }
-  </script>
+  }
+</script>
 </body>
 </html>
