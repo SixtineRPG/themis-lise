@@ -643,20 +643,33 @@ synchroniserForm.submit();
 // ==========================================================
 
 window.addEventListener("message", (event) => {
-  console.log("[SYNC] Message reçu :", event);
+  console.log("[SYNC] Message reçu !");
   console.log("[SYNC] Origine :", event.origin);
-  console.log("[SYNC] Source :", event.source);
-  console.log("[SYNC] Iframe :", synchroniserFrame.contentWindow);
-  console.log("[SYNC] Réponse :", event.data);
+  console.log("[SYNC] Source iframe :", event.source === synchroniserFrame.contentWindow);
+  console.log("[SYNC] Données :", event.data);
   console.log("[SYNC] ID attendu :", synchronisationEnCours);
 
-  if (event.origin !== "https://sixtinerpg.github.io") return;
-  if (event.source !== synchroniserFrame.contentWindow) return;
+  if (event.origin !== "https://sixtinerpg.github.io") {
+    console.warn("[SYNC] Origine refusée.");
+    return;
+  }
+
+  if (event.source !== synchroniserFrame.contentWindow) {
+    console.warn("[SYNC] Source refusée.");
+    return;
+  }
 
   const response = event.data;
 
-  if (!response || typeof response !== "object") return;
-  if (response.requestId !== synchronisationEnCours) return;
+  if (!response || typeof response !== "object") {
+    console.warn("[SYNC] Réponse invalide.");
+    return;
+  }
+
+  if (response.requestId !== synchronisationEnCours) {
+    console.warn("[SYNC] Identifiant différent.");
+    return;
+  }
 
   synchronisationEnCours = null;
 
@@ -671,6 +684,8 @@ window.addEventListener("message", (event) => {
   }
 
   synchroniserButton.disabled = false;
+
+  console.log("[SYNC] Synchronisation terminée.");
 });
 
 // ==========================================================
