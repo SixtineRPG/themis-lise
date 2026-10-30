@@ -637,32 +637,39 @@ synchroniserForm.submit();
 
 // = Réception de la réponse Apps Script.
 
-window.addEventListener("message", (event) => {
-  const allowedOrigins = [
-    "https://script.google.com",
-    "https://script.googleusercontent.com",
-  ];
+// ==========================================================
+// RETOUR DE SYNCHRONISATION
+// ==========================================================
 
-  if (!allowedOrigins.includes(event.origin)) return;
+const params = new URLSearchParams(window.location.search);
+const syncResponse = params.get("sync");
 
-  const response = event.data;
-  if (!response || typeof response !== "object") return;
+if (syncResponse) {
+  try {
+    const response = JSON.parse(syncResponse);
 
-  if (response.requestId !== synchronisationEnCours) return;
+    if (response.requestId === synchronisationEnCours) {
+      if (response.success) {
+        modificationsEnAttente.clear();
+        actualiserCompteur();
+        synchroniserMessage.textContent = "Synchronisation terminée !";
+      } else {
+        synchroniserMessage.textContent =
+          `Erreur : ${response.message || "Synchronisation impossible."}`;
+      }
 
-  synchronisationEnCours = null;
-
-  if (response.success) {
-    modificationsEnAttente.clear();
-    actualiserCompteur();
-    synchroniserMessage.textContent = "Synchronisation terminée !";
-  } else {
-    synchroniserMessage.textContent =
-      `Erreur : ${response.message || "Synchronisation impossible."}`;
+      synchronisationEnCours = null;
+    }
+  } catch (error) {
+    synchroniserMessage.textContent = "Réponse de synchronisation invalide.";
   }
 
-  synchroniserButton.disabled = false;
-});
+  window.history.replaceState(
+    {},
+    document.title,
+    window.location.pathname
+  );
+}
 
 
 
