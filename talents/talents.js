@@ -238,21 +238,6 @@ function renderTalents(talents) {
 .map((talent) => {
   const config = TARGET_TALENTS_BY_NAME.get(normalizeName(talent.nom));
 
-  const category = TALENTS_OBJETS[normalizeName(talent.nom)];
-
-  // = Récupération de la dernière distribution.
-
-  const derniereDistribution = distributionsByKey.get(
-    `${player.id}::${normalizeName(talent.nom)}`
-  );
-
-  // = Calcul de la prochaine distribution.
-
-  const prochaineDistribution = getNextDistribution(
-    derniereDistribution,
-    config?.delai
-  );
-
   return `
             <li class="talents__item">
               ${
@@ -399,12 +384,25 @@ function renderTalentsJoueurs(members, talents, distributions) {
             <div class="talents__joueur-details-inner">
               <ul class="talents__joueur-list">
                 ${player.talents
-                  .map((talent) => {
-                    const config = TARGET_TALENTS_BY_NAME.get(normalizeName(talent.nom));
+.map((talent) => {
+  const config = TARGET_TALENTS_BY_NAME.get(normalizeName(talent.nom));
 
-                    const category = TALENTS_OBJETS[normalizeName(talent.nom)];
+  const category = TALENTS_OBJETS[normalizeName(talent.nom)];
 
-                    return `
+  // = Récupération de la dernière distribution.
+
+  const derniereDistribution = distributionsByKey.get(
+    `${player.id}::${normalizeName(talent.nom)}`
+  );
+
+  // = Calcul de la prochaine distribution.
+
+  const prochaineDistribution = getNextDistribution(
+    derniereDistribution,
+    config?.delai
+  );
+
+  return `
 <li
   class="talents__joueur-talent"
   data-talent="${escapeHtml(talent.nom)}"
