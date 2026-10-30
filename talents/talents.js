@@ -186,6 +186,34 @@ function getRandomObject(category, objets) {
   return items[Math.floor(Math.random() * items.length)];
 }
 
+// = Formater une date de distribution.
+
+function formatDate(date) {
+  if (!date) return "—";
+
+  const value = String(date).trim();
+
+  // = Format AAAA-MM-JJ.
+
+  const isoMatch = value.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+
+  if (isoMatch) {
+    const [, year, month, day] = isoMatch;
+    return `${day.padStart(2, "0")}/${month.padStart(2, "0")}/${year}`;
+  }
+
+  // = Format JJ/MM/AAAA.
+
+  const frMatch = value.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+
+  if (frMatch) {
+    const [, day, month, year] = frMatch;
+    return `${day.padStart(2, "0")}/${month.padStart(2, "0")}/${year}`;
+  }
+
+  return value;
+}
+
 // ==========================================================
 // TALENTS CONCERNÉS
 // Source : talents.json
@@ -432,20 +460,16 @@ function renderTalentsJoueurs(members, talents, distributions) {
     </button>
   </div>
 
-    <div class="talents__joueur-talent-derniere-date">
-    <span>Dernière distribution</span>
-    <strong>
-      ${
-        distributionsByKey.get(
-          `${player.id}::${normalizeName(talent.nom)}`
-        )
-          ? new Date(
-              `${distributionsByKey.get(`${player.id}::${normalizeName(talent.nom)}`)}T00:00:00`
-            ).toLocaleDateString("fr-FR")
-          : "—"
-      }
-    </strong>
-  </div>
+<div class="talents__joueur-talent-derniere-date">
+  <span>Dernière distribution</span>
+  <strong>
+    ${formatDate(
+      distributionsByKey.get(
+        `${player.id}::${normalizeName(talent.nom)}`
+      )
+    )}
+  </strong>
+</div>
 
   <div class="talents__joueur-talent-prochaine">
     <span>Prochaine distribution</span>
