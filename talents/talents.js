@@ -283,10 +283,11 @@ function renderTalentsJoueurs(members, talents) {
       const detailsId = `talents-details-${index}`;
 
       return `
-        <li
-          class="talents__joueur border-grp"
-          data-group="grp-${escapeHtml(player.groupe)}"
-        >
+<li
+  class="talents__joueur-talent"
+  data-talent="${escapeHtml(talent.nom)}"
+  data-delai="${escapeHtml(config?.delai || "quinzaine")}"
+>
           <!-- = Avatar -->
           <img
             class="talents__joueur-avatar"
