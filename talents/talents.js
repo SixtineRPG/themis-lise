@@ -642,7 +642,12 @@ synchroniserForm.submit();
 // ==========================================================
 
 window.addEventListener("message", (event) => {
-  // = Vérifier l'origine et la fenêtre émettrice.
+  console.log("[SYNC] Message reçu :", event);
+  console.log("[SYNC] Origine :", event.origin);
+  console.log("[SYNC] Source :", event.source);
+  console.log("[SYNC] Iframe :", synchroniserFrame.contentWindow);
+  console.log("[SYNC] Réponse :", event.data);
+  console.log("[SYNC] ID attendu :", synchronisationEnCours);
 
   if (event.origin !== "https://sixtinerpg.github.io") return;
   if (event.source !== synchroniserFrame.contentWindow) return;
@@ -666,7 +671,6 @@ window.addEventListener("message", (event) => {
 
   synchroniserButton.disabled = false;
 });
-
 
 // ==========================================================
 // INITIALISATION
