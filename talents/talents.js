@@ -2,6 +2,7 @@ const TALENTS_URL = "https://sixtinerpg.github.io/themis-lise/talents/talents.js
 //const MEMBERLIST_URL = "../../shared/memberlist_json.php";
 const MEMBERLIST_URL = "https://sixtinerpg.github.io/themis-lise/talents/memberlist_local.json";
 const OBJETS_URL = "https://sixtinerpg.github.io/themis-lise/talents/objets.json";
+const DISTRIBUTION_URL = "https://opensheet.elk.sh/1sRWoDg-4tnX_oiE_v0PK_D7ZGnxLk6OAeJY91PVFkoU/Distributions";
 
 
 // ==========================================================
@@ -260,11 +261,20 @@ function renderTalents(talents) {
 // Sources : memberlist_json.php + talents.json
 // ==========================================================
 
-function renderTalentsJoueurs(members, talents) {
+function renderTalentsJoueurs(members, talents, distributions) {
   const selectedTalents = getTargetTalents(talents);
 
   const talentsByName = new Map(selectedTalents.map((talent) => [normalizeName(talent.nom), talent]));
 
+  // = Index des dernières distributions.
+
+  const distributionsByKey = new Map(
+    distributions.map((distribution) => [
+      `${distribution.joueur_id}::${normalizeName(distribution.talent)}`,
+      distribution.derniere_distribution,
+    ])
+  );
+  
   const players = members
     .filter((member) => member.id !== "1")
     .map((member) => {
@@ -420,6 +430,21 @@ function renderTalentsJoueurs(members, talents) {
     >
       Valider la date
     </button>
+  </div>
+
+    <div class="talents__joueur-talent-derniere-date">
+    <span>Dernière distribution</span>
+    <strong>
+      ${
+        distributionsByKey.get(
+          `${player.id}::${normalizeName(talent.nom)}`
+        )
+          ? new Date(
+              `${distributionsByKey.get(`${player.id}::${normalizeName(talent.nom)}`)}T00:00:00`
+            ).toLocaleDateString("fr-FR")
+          : "—"
+      }
+    </strong>
   </div>
 
   <div class="talents__joueur-talent-prochaine">
@@ -687,15 +712,19 @@ window.addEventListener("message", (event) => {
 
 async function initTalents() {
   try {
-    const [talentsData, membersData, objets] = await Promise.all([fetchJson(TALENTS_URL), fetchJson(MEMBERLIST_URL), fetchJson(OBJETS_URL)]);
-
+const [talentsData, membersData, objets, distributions] = await Promise.all([
+  fetchJson(TALENTS_URL),
+  fetchJson(MEMBERLIST_URL),
+  fetchJson(OBJETS_URL),
+  fetchJson(DISTRIBUTION_URL)
+]);
     const talents = Array.isArray(talentsData) ? talentsData : talentsData.talents;
     const members = Array.isArray(membersData) ? membersData : membersData.members;
 
     objetsData = objets;
 
     renderTalents(talents);
-    renderTalentsJoueurs(members, talents);
+    renderTalentsJoueurs(members, talents, distributions);
   } catch (error) {
     console.error("[Talents]", error);
   }
