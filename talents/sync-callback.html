@@ -19,21 +19,20 @@
 
       const response = JSON.parse(syncResponse);
 
-      status.textContent = "Réponse reçue. Transmission à la page principale...";
+      status.textContent = "Transmission de la réponse...";
 
-      window.parent.postMessage(
-        response,
-        "https://sixtinerpg.github.io"
-      );
+      // = Envoi direct à la page principale.
+
+      window.top.postMessage(response, "https://sixtinerpg.github.io");
 
       status.textContent = "Réponse transmise.";
     } catch (error) {
       status.textContent = `Erreur : ${error.message}`;
 
-      window.parent.postMessage(
+      window.top.postMessage(
         {
           success: false,
-          message: error.message
+          message: error.message,
         },
         "https://sixtinerpg.github.io"
       );
