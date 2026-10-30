@@ -1,7 +1,7 @@
-const TALENTS_URL = "../../shared/data/talents.json";
+const TALENTS_URL = "https://sixtinerpg.github.io/themis-lise/talents/talents.json";
 //const MEMBERLIST_URL = "../../shared/memberlist_json.php";
-const MEMBERLIST_URL = "../../shared/memberlist_local.json";
-const OBJETS_URL = "../../shared/data/objets.json";
+const MEMBERLIST_URL = "https://sixtinerpg.github.io/themis-lise/talents/memberlist_local.json";
+const OBJETS_URL = "https://sixtinerpg.github.io/themis-lise/talents/objets.json";
 
 // ==========================================================
 // CONFIGURATION
@@ -389,6 +389,20 @@ function renderTalentsJoueurs(members, talents) {
                               : ""
                           }
                         </div>
+                        <div class="talents__joueur-talent-reference">
+
+  <div class="talents__joueur-talent-date">
+    <!-- Date à ajouter ultérieurement -->
+  </div>
+
+  <button
+    class="talents__joueur-talent-don"
+    type="button"
+  >
+    Donner la récompense
+  </button>
+
+</div>
                       </li>
                     `;
                   })
