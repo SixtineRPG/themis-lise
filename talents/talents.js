@@ -643,22 +643,39 @@ synchroniserButton.addEventListener("click", () => {
 // = Réception de la confirmation.
 
 window.addEventListener("message", (event) => {
+  // = Vérification de l'origine.
+
   if (event.origin !== "https://sixtinerpg.github.io") return;
 
   const response = event.data;
 
   if (!response || typeof response !== "object") return;
-  if (response.requestId !== synchronisationEnCours) return;
+  if (!synchronisationEnCours) return;
+
+  // = Vérification de la requête.
+
+  if (
+    response.requestId &&
+    response.requestId !== synchronisationEnCours
+  ) {
+    return;
+  }
 
   synchronisationEnCours = null;
+
+  // = Mise à jour de l'affichage.
 
   if (response.success) {
     modificationsEnAttente.clear();
     actualiserCompteur();
+
     synchroniserMessage.textContent = "Synchronisation terminée !";
+    synchroniserMessage.dataset.status = "success";
   } else {
     synchroniserMessage.textContent =
       `Erreur : ${response.message || "Synchronisation impossible."}`;
+
+    synchroniserMessage.dataset.status = "error";
   }
 
   synchroniserButton.disabled = false;
