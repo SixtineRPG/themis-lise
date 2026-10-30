@@ -283,11 +283,11 @@ function renderTalentsJoueurs(members, talents) {
       const detailsId = `talents-details-${index}`;
 
       return `
-<li
-  class="talents__joueur-talent"
-  data-talent="${escapeHtml(talent.nom)}"
-  data-delai="${escapeHtml(config?.delai || "quinzaine")}"
->
+  <li
+    class="talents__joueur border-grp"
+    data-group="grp-${escapeHtml(player.groupe)}"
+    data-joueur-id="${escapeHtml(player.id)}"
+  >
           <!-- = Avatar -->
           <img
             class="talents__joueur-avatar"
@@ -351,8 +351,11 @@ function renderTalentsJoueurs(members, talents) {
                     const category = TALENTS_OBJETS[normalizeName(talent.nom)];
 
                     return `
-                      <li class="talents__joueur-talent" data-delai="${escapeHtml(config?.delai || "")}">
-                        ${
+<li
+  class="talents__joueur-talent"
+  data-talent="${escapeHtml(talent.nom)}"
+  data-delai="${escapeHtml(config?.delai || "")}"
+>                        ${
                           talent.icon
                             ? `
                               <img
@@ -524,6 +527,78 @@ talentsJoueurs.addEventListener("click", (event) => {
     month: "2-digit",
     year: "numeric",
   });
+
+  // = Enregistrement de la modification.
+
+const joueur = button.closest(".talents__joueur");
+
+const joueurId = joueur.dataset.joueurId;
+const talentName = talent.dataset.talent;
+
+marquerModification(`${joueurId}::${talentName}`, {
+  type: "date",
+  joueur_id: joueurId,
+  talent: talentName,
+  derniere_distribution: input.value,
+});
+});
+
+      // ==========================================================
+// SYNCHRONISATION GOOGLE SHEETS
+// ==========================================================
+
+const GOOGLE_SHEETS_API_URL = "https://script.google.com/macros/s/AKfycby7sfWJyZ_2PMn1gm8MuaHk594uk6_dEUxTEEEV6j5Bo3lp2rgoBhcHPzbMmWSuGjtoGw/exec";
+
+const synchroniserButton = document.querySelector("#synchroniser-sheets");
+const synchroniserMessage = document.querySelector("#synchroniser-message");
+
+synchroniserButton.addEventListener("click", () => {
+  synchroniserButton.disabled = true;
+  synchroniserMessage.textContent = "Synchronisation en cours...";
+
+  const url = `${GOOGLE_SHEETS_API_URL}?action=synchroniser`;
+
+  window.open(url, "_blank");
+
+  synchroniserButton.disabled = false;
+  synchroniserMessage.textContent = "Requête envoyée à Google Apps Script.";
+});
+
+      // ==========================================================
+// MODIFICATIONS NON ENREGISTRÉES
+// ==========================================================
+
+const modificationsEnAttente = new Map();
+
+const synchroniserCompteur = document.querySelector("#synchroniser-compteur");
+
+// = Enregistrer une modification.
+
+function marquerModification(key, data) {
+  modificationsEnAttente.set(key, data);
+
+  actualiserCompteur();
+}
+
+// = Actualiser le compteur.
+
+function actualiserCompteur() {
+  const count = modificationsEnAttente.size;
+
+  if (!synchroniserCompteur) return;
+
+  synchroniserCompteur.textContent = count > 0
+    ? `${count} modification${count > 1 ? "s" : ""} non enregistrée${count > 1 ? "s" : ""} sur Google Sheets`
+    : "Aucune modification en attente";
+}
+
+// = Avertissement avant de quitter.
+
+window.addEventListener("beforeunload", (event) => {
+  if (modificationsEnAttente.size === 0) return;
+
+  event.preventDefault();
+  event.returnValue = "";
 });
 
 // ==========================================================
