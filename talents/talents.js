@@ -594,6 +594,8 @@ const synchroniserButton = document.querySelector("#synchroniser-sheets");
 const synchroniserMessage = document.querySelector("#synchroniser-message");
 const synchroniserFrame = document.querySelector("#synchroniser-frame");
 
+let synchronisationEnCours = null;
+
 // = Création du formulaire d'envoi.
 
 const synchroniserForm = document.createElement("form");
@@ -622,14 +624,15 @@ synchroniserButton.addEventListener("click", () => {
   synchroniserButton.disabled = true;
   synchroniserMessage.textContent = "Synchronisation en cours...";
 
-  const payload = {
-    requestId: String(Date.now()),
-    modifications: Array.from(modificationsEnAttente.values()),
-  };
+const payload = {
+  requestId: String(Date.now()),
+  modifications: Array.from(modificationsEnAttente.values()),
+};
 
-  synchroniserPayload.value = JSON.stringify(payload);
+synchronisationEnCours = payload.requestId;
 
-  synchroniserForm.submit();
+synchroniserPayload.value = JSON.stringify(payload);
+synchroniserForm.submit();
 });
 
 // = Réception de la réponse Apps Script.
@@ -643,14 +646,15 @@ window.addEventListener("message", (event) => {
   if (!allowedOrigins.includes(event.origin)) return;
 
   const response = event.data;
-
   if (!response || typeof response !== "object") return;
+
+  if (response.requestId !== synchronisationEnCours) return;
+
+  synchronisationEnCours = null;
 
   if (response.success) {
     modificationsEnAttente.clear();
-
     actualiserCompteur();
-
     synchroniserMessage.textContent = "Synchronisation terminée !";
   } else {
     synchroniserMessage.textContent =
