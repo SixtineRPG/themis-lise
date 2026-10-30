@@ -371,7 +371,10 @@ function renderTalentsJoueurs(members, talents, distributions) {
   const distributionsByKey = new Map(
     distributions.map((distribution) => [
       `${distribution.joueur_id}::${normalizeName(distribution.talent)}`,
-      distribution.derniere_distribution,
+      {
+        derniere_distribution: distribution.derniere_distribution,
+        dernier_item: distribution.dernier_item,
+      },
     ])
   );
 
@@ -479,8 +482,21 @@ function renderTalentsJoueurs(members, talents, distributions) {
 
                     // = Récupération de la dernière distribution.
 
-                    const derniereDistribution = distributionsByKey.get(
+                    const distribution = distributionsByKey.get(
                       `${player.id}::${normalizeName(talent.nom)}`
+                    );
+
+                    const derniereDistribution =
+                      distribution?.derniere_distribution;
+
+                    const dernierItem = distribution?.dernier_item;
+
+                    // = Recherche du dernier objet distribué.
+
+                    const dernierObjet = (objetsData[category] || []).find(
+                      (objet) =>
+                        normalizeName(objet.nom) ===
+                        normalizeName(dernierItem || "")
                     );
 
                     // = Calcul de la prochaine distribution.
@@ -535,6 +551,33 @@ function renderTalentsJoueurs(members, talents, distributions) {
                         </div>
 
                         <div class="talents__joueur-talent-reference">
+
+                          <!-- = Dernier objet distribué -->
+
+                          <div class="talents__joueur-talent-dernier-item-donne">
+                            ${
+                              dernierObjet
+                                ? `
+                                  ${
+                                    dernierObjet.image
+                                      ? `
+                                        <img
+                                          src="${escapeHtml(dernierObjet.image)}"
+                                          alt=""
+                                        >
+                                      `
+                                      : ""
+                                  }
+
+                                  <span>
+                                    ${escapeHtml(dernierObjet.nom)}
+                                  </span>
+                                `
+                                : `
+                                  <span>Aucun objet distribué</span>
+                                `
+                            }
+                          </div>
 
                           <button
                             class="talents__joueur-talent-don"
@@ -636,7 +679,6 @@ window.addEventListener("beforeunload", (event) => {
   event.returnValue = "";
 });
 
-
 // ==========================================================
 // GÉNÉRATION ALÉATOIRE D'OBJETS
 // ==========================================================
@@ -653,23 +695,6 @@ talentsJoueurs.addEventListener("click", (event) => {
     button.disabled = true;
     return;
   }
-
-  // = Récupération du joueur et du talent.
-
-  const talent = button.closest(".talents__joueur-talent");
-  const joueur = button.closest(".talents__joueur");
-
-  const joueurId = joueur.dataset.joueurId;
-  const talentName = talent.dataset.talent;
-
-  // = Enregistrement de l'objet à synchroniser.
-
-  marquerModification(`${joueurId}::${talentName}::item`, {
-    type: "item",
-    joueur_id: joueurId,
-    talent: talentName,
-    dernier_item: objet.nom,
-  });
 
   // = Affichage de l'objet généré.
 
@@ -690,6 +715,46 @@ talentsJoueurs.addEventListener("click", (event) => {
       </span>
     </div>
   `;
+});
+
+// ==========================================================
+// DISTRIBUTION DES RÉCOMPENSES
+// ==========================================================
+
+talentsJoueurs.addEventListener("click", (event) => {
+  const button = event.target.closest(".talents__joueur-talent-don");
+
+  if (!button) return;
+
+  const talent = button.closest(".talents__joueur-talent");
+  const joueur = button.closest(".talents__joueur");
+
+  const objet = talent.querySelector(".talents__objet-name");
+
+  if (!objet) {
+    button.textContent = "Générer un objet d'abord";
+    return;
+  }
+
+  // = Récupération des informations.
+
+  const joueurId = joueur.dataset.joueurId;
+  const talentName = talent.dataset.talent;
+  const objetName = objet.textContent.trim();
+
+  // = Enregistrement de la récompense.
+
+  marquerModification(`${joueurId}::${talentName}::item`, {
+    type: "item",
+    joueur_id: joueurId,
+    talent: talentName,
+    dernier_item: objetName,
+  });
+
+  // = Confirmation visuelle.
+
+  button.textContent = "Récompense enregistrée";
+  button.disabled = true;
 });
 
 // ==========================================================
