@@ -591,6 +591,10 @@ const GOOGLE_SHEETS_API_URL = "https://script.google.com/macros/s/AKfycby7sfWJyZ
 // SYNCHRONISATION GOOGLE SHEETS
 // ==========================================================
 
+// ==========================================================
+// SYNCHRONISATION GOOGLE SHEETS
+// ==========================================================
+
 const synchroniserButton = document.querySelector("#synchroniser-sheets");
 const synchroniserMessage = document.querySelector("#synchroniser-message");
 const synchroniserFrame = document.querySelector("#synchroniser-frame");
@@ -625,58 +629,32 @@ synchroniserButton.addEventListener("click", () => {
   synchroniserButton.disabled = true;
   synchroniserMessage.textContent = "Synchronisation en cours...";
 
-const payload = {
-  requestId: String(Date.now()),
-  modifications: Array.from(modificationsEnAttente.values()),
-};
+  const payload = {
+    requestId: String(Date.now()),
+    modifications: Array.from(modificationsEnAttente.values()),
+  };
 
-synchronisationEnCours = payload.requestId;
+  synchronisationEnCours = payload.requestId;
 
-synchroniserPayload.value = JSON.stringify(payload);
-synchroniserForm.submit();
+  synchroniserPayload.value = JSON.stringify(payload);
+  synchroniserForm.submit();
 });
 
-// = Réception de la réponse Apps Script.
-
-// ==========================================================
-// RETOUR DE SYNCHRONISATION
-// ==========================================================
+// = Réception de la confirmation.
 
 window.addEventListener("message", (event) => {
-  console.log("[SYNC] Message reçu !");
-  console.log("[SYNC] Origine :", event.origin);
-  console.log("[SYNC] Source iframe :", event.source === synchroniserFrame.contentWindow);
-  console.log("[SYNC] Données :", event.data);
-  console.log("[SYNC] ID attendu :", synchronisationEnCours);
-
-  if (event.origin !== "https://sixtinerpg.github.io") {
-    console.warn("[SYNC] Origine refusée.");
-    return;
-  }
-
-  if (event.source !== synchroniserFrame.contentWindow) {
-    console.warn("[SYNC] Source refusée.");
-    return;
-  }
+  if (event.origin !== "https://sixtinerpg.github.io") return;
 
   const response = event.data;
 
-  if (!response || typeof response !== "object") {
-    console.warn("[SYNC] Réponse invalide.");
-    return;
-  }
-
-  if (response.requestId !== synchronisationEnCours) {
-    console.warn("[SYNC] Identifiant différent.");
-    return;
-  }
+  if (!response || typeof response !== "object") return;
+  if (response.requestId !== synchronisationEnCours) return;
 
   synchronisationEnCours = null;
 
   if (response.success) {
     modificationsEnAttente.clear();
     actualiserCompteur();
-
     synchroniserMessage.textContent = "Synchronisation terminée !";
   } else {
     synchroniserMessage.textContent =
@@ -684,8 +662,6 @@ window.addEventListener("message", (event) => {
   }
 
   synchroniserButton.disabled = false;
-
-  console.log("[SYNC] Synchronisation terminée.");
 });
 
 // ==========================================================
