@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Retour synchronisation</title>
+</head>
+<body>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const syncResponse = params.get("sync");
+
+    if (syncResponse) {
+      try {
+        const response = JSON.parse(syncResponse);
+
+        window.parent.postMessage(
+          response,
+          "https://sixtinerpg.github.io"
+        );
+      } catch (error) {
+        window.parent.postMessage(
+          {
+            success: false,
+            message: "Réponse de synchronisation invalide.",
+          },
+          "https://sixtinerpg.github.io"
+        );
+      }
+    }
+  </script>
+</body>
+</html>
