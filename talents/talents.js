@@ -493,11 +493,11 @@ function renderTalentsJoueurs(members, talents, distributions) {
 
                     // = Recherche du dernier objet distribué.
 
-                    const dernierObjet = (objetsData[category] || []).find(
-                      (objet) =>
-                        normalizeName(objet.nom) ===
-                        normalizeName(dernierItem || "")
-                    );
+const dernierObjet = (objetsData[category] || []).find(
+  (objet) =>
+    normalizeName(objet.nom).replace(/[^a-z0-9]/g, "") ===
+    normalizeName(dernierItem || "").replace(/[^a-z0-9]/g, "")
+);
 
                     // = Calcul de la prochaine distribution.
 
