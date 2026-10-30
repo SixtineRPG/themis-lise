@@ -186,6 +186,24 @@ function getRandomObject(category, objets) {
   return items[Math.floor(Math.random() * items.length)];
 }
 
+// = Normaliser les noms pour les comparaisons.
+
+function normalizeObjectName(name) {
+  return normalizeName(name).replace(/[^a-z0-9]/g, "");
+}
+
+// = Récupérer un objet par son nom.
+
+function getObjectByName(category, name) {
+  const items = objetsData[category];
+
+  if (!Array.isArray(items) || !name) return null;
+
+  return items.find(
+    (objet) => normalizeObjectName(objet.nom) === normalizeObjectName(name)
+  ) || null;
+}
+
 // = Formater une date de distribution.
 
 // = Convertir une date en objet Date.
@@ -360,282 +378,168 @@ function renderTalentsJoueurs(members, talents, distributions) {
   const selectedTalents = getTargetTalents(talents);
 
   const talentsByName = new Map(
-    selectedTalents.map((talent) => [
-      normalizeName(talent.nom),
-      talent,
-    ])
+    selectedTalents.map((talent) => [normalizeName(talent.nom), talent])
   );
 
   // = Index des dernières distributions.
+  const distributionsByKey = new Map();
 
-  const distributionsByKey = new Map(
-    distributions.map((distribution) => [
-      `${distribution.joueur_id}::${normalizeName(distribution.talent)}`,
-      {
-        derniere_distribution: distribution.derniere_distribution,
-        dernier_item: distribution.dernier_item,
-      },
-    ])
-  );
+  distributions.forEach((distribution) => {
+    const key = `${distribution.joueur_id}::${normalizeName(distribution.talent)}`;
 
-  // = Préparation des joueurs.
+    distributionsByKey.set(key, {
+      derniere_distribution: distribution.derniere_distribution,
+      dernier_item: distribution.dernier_item,
+    });
+  });
 
   const players = members
     .filter((member) => member.id !== "1")
-    .map((member) => {
-      const playerTalents = (member.talents || [])
+    .map((player) => {
+      const playerTalents = (player.talents || [])
         .map((name) => talentsByName.get(normalizeName(name)))
         .filter(Boolean);
 
       return {
-        ...member,
+        ...player,
         talents: playerTalents,
       };
     })
-    .filter((member) => member.talents.length > 0)
-    .sort((a, b) => a.pseudo.localeCompare(b.pseudo, "fr"));
-
-  // = Génération HTML.
+    .filter((player) => player.talents.length > 0);
 
   talentsJoueurs.innerHTML = players
-    .map((player, index) => {
-      const previewTalents = player.talents;
-      const detailsId = `talents-details-${index}`;
+    .map((player) => {
+      const playerTalents = player.talents
+        .map((talent) => {
+          const talentName = talent.nom;
+          const normalizedTalent = normalizeName(talentName);
 
-      return `
-        <li
-          class="talents__joueur border-grp"
-          data-group="grp-${escapeHtml(player.groupe)}"
-          data-joueur-id="${escapeHtml(player.id)}"
-        >
-          <!-- = Avatar -->
+          const category = TALENTS_OBJETS[normalizedTalent];
 
-          <img
-            class="talents__joueur-avatar"
-            src="${escapeHtml(player.avatar)}"
-            alt=""
-          >
+          const distribution = distributionsByKey.get(
+            `${player.id}::${normalizedTalent}`
+          );
 
-          <!-- = Identité -->
+          const derniereDistribution =
+            distribution?.derniere_distribution || "";
 
-          <div class="talents__joueur-identity">
-            <h3 class="talents__joueur-name txt-grp">
-              ${escapeHtml(player.pseudo)}
-            </h3>
+          const dernierItem = distribution?.dernier_item || "";
 
-            <span class="talents__joueur-rank">
-              rang ${escapeHtml(player.rank)}
-            </span>
+          const dernierObjet = getObjectByName(category, dernierItem);
 
-            <span class="talents__joueur-count">
-              ${player.talents.length}
-              talent${player.talents.length > 1 ? "s" : ""}
-            </span>
-          </div>
+          return `
+            <li
+              class="talents__joueur-talent"
+              data-talent="${escapeHtml(talentName)}"
+              data-category="${category || ""}"
+            >
+              <div class="talents__joueur-talent-header">
+                <img
+                  class="talents__icon"
+                  src="${escapeHtml(talent.image || "")}"
+                  alt=""
+                >
 
-          <!-- = Bouton d'ouverture -->
+                <span class="talents__joueur-talent-name">
+                  ${escapeHtml(talentName)}
+                </span>
 
-          <button
-            class="talents__joueur-toggle"
-            type="button"
-            aria-expanded="false"
-            aria-controls="${detailsId}"
-            aria-label="Afficher les talents de ${escapeHtml(player.pseudo)}"
-          >
-            <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
-          </button>
+                <div
+                  class="talents__type"
+                  data-type="${escapeHtml(talent.type || "")}"
+                ></div>
+              </div>
 
-          <!-- = Aperçu des talents -->
+              <p class="talents__description">
+                ${escapeHtml(talent.description || "")}
+              </p>
 
-          <div class="talents__joueur-preview">
-            ${previewTalents
-              .map(
-                (talent) => `
-                  <span class="talents__joueur-badge">
-                    ${escapeHtml(talent.nom)}
-                  </span>
-                `
-              )
-              .join("")}
-          </div>
+              ${
+                category
+                  ? `
+                    <div class="talents__joueur-talent-recompense">
+                      <div class="talents__joueur-talent-dernier">
+                        <span class="talents__joueur-talent-label">
+                          Dernière récompense
+                        </span>
 
-          <!-- = Détails dépliables -->
-
-          <div
-            class="talents__joueur-details"
-            id="${detailsId}"
-            aria-hidden="true"
-            inert
-          >
-            <div class="talents__joueur-details-inner">
-              <ul class="talents__joueur-list">
-
-                ${player.talents
-                  .map((talent) => {
-                    const config = TARGET_TALENTS_BY_NAME.get(
-                      normalizeName(talent.nom)
-                    );
-
-                    const category = TALENTS_OBJETS[
-                      normalizeName(talent.nom)
-                    ];
-
-                    // = Récupération de la dernière distribution.
-
-                    const distribution = distributionsByKey.get(
-                      `${player.id}::${normalizeName(talent.nom)}`
-                    );
-
-                    const derniereDistribution =
-                      distribution?.derniere_distribution;
-
-                    const dernierItem = distribution?.dernier_item;
-
-                    // = Recherche du dernier objet distribué.
-
-const dernierObjet = (objetsData[category] || []).find(
-  (objet) =>
-    normalizeName(objet.nom).replace(/[^a-z0-9]/g, "") ===
-    normalizeName(dernierItem || "").replace(/[^a-z0-9]/g, "")
-);
-
-                    // = Calcul de la prochaine distribution.
-
-                    const prochaineDistribution = getNextDistribution(
-                      derniereDistribution,
-                      config?.delai
-                    );
-
-                    return `
-                      <li
-                        class="talents__joueur-talent"
-                        data-talent="${escapeHtml(talent.nom)}"
-                        data-delai="${escapeHtml(config?.delai || "")}"
-                      >
                         ${
-                          talent.icon
+                          dernierObjet
                             ? `
-                              <img
-                                class="talents__joueur-talent-icon"
-                                src="${escapeHtml(talent.icon)}"
-                                alt=""
-                              >
+                              <div class="talents__joueur-talent-dernier-item-donne">
+                                ${
+                                  dernierObjet.image
+                                    ? `
+                                      <img
+                                        class="talents__objet-image"
+                                        src="${escapeHtml(dernierObjet.image)}"
+                                        alt="${escapeHtml(dernierObjet.nom)}"
+                                      >
+                                    `
+                                    : ""
+                                }
+
+                                <span>
+                                  ${escapeHtml(dernierObjet.nom)}
+                                </span>
+                              </div>
+                            `
+                            : `
+                              <span class="talents__joueur-talent-empty">
+                                Aucun objet distribué
+                              </span>
+                            `
+                        }
+
+                        ${
+                          derniereDistribution
+                            ? `
+                              <span class="talents__joueur-talent-date">
+                                ${escapeHtml(derniereDistribution)}
+                              </span>
                             `
                             : ""
                         }
+                      </div>
 
-                        <div class="talents__joueur-talent-info">
-                          <h4 class="talents__joueur-talent-name">
-                            ${escapeHtml(talent.nom)}
-                          </h4>
+                      <div class="talents__joueur-talent-actions">
+                        <button
+                          class="talents__generer"
+                          data-category="${category}"
+                          type="button"
+                        >
+                          Générer un objet
+                        </button>
 
-                          <p class="talents__joueur-talent-description">
-                            ${escapeHtml(config?.effet || "")}
-                          </p>
-                        </div>
+                        <button
+                          class="talents__joueur-talent-don"
+                          type="button"
+                        >
+                          Enregistrer la récompense
+                        </button>
+                      </div>
+                    </div>
+                  `
+                  : ""
+              }
+            </li>
+          `;
+        })
+        .join("");
 
-                        <div class="talents__joueur-talent-generation">
-                          ${
-                            category
-                              ? `
-                                <button
-                                  class="talents__generer"
-                                  type="button"
-                                  data-category="${escapeHtml(category)}"
-                                >
-                                  Générer aléatoirement
-                                </button>
-                              `
-                              : ""
-                          }
-                        </div>
+      return `
+        <article
+          class="talents__joueur"
+          data-joueur-id="${escapeHtml(player.id)}"
+        >
+          <h3 class="talents__joueur-name">
+            ${escapeHtml(player.name)}
+          </h3>
 
-                        <div class="talents__joueur-talent-reference">
-
-                          <!-- = Dernier objet distribué -->
-
-                          <div class="talents__joueur-talent-dernier-item-donne">
-                            ${
-                              dernierObjet
-                                ? `
-                                  ${
-                                    dernierObjet.image
-                                      ? `
-                                        <img
-                                          src="${escapeHtml(dernierObjet.image)}"
-                                          alt=""
-                                        >
-                                      `
-                                      : ""
-                                  }
-
-                                  <span>
-                                    ${escapeHtml(dernierObjet.nom)}
-                                  </span>
-                                `
-                                : `
-                                  <span>Aucun objet distribué</span>
-                                `
-                            }
-                          </div>
-
-                          <button
-                            class="talents__joueur-talent-don"
-                            type="button"
-                          >
-                            Donner la récompense
-                          </button>
-
-                          <div class="talents__joueur-talent-date">
-                            <label>
-                              <i class="fa-regular fa-calendar"></i>
-
-                              <input
-                                class="talents__joueur-talent-date-input"
-                                type="date"
-                                aria-label="Date de distribution de ${escapeHtml(talent.nom)}"
-                              >
-                            </label>
-
-                            <button
-                              class="talents__joueur-talent-date-submit"
-                              type="button"
-                            >
-                              Valider la date
-                            </button>
-                          </div>
-
-                          <div class="talents__joueur-talent-derniere-date">
-                            <span>Dernière distribution</span>
-                            <strong>${formatDate(derniereDistribution)}</strong>
-                          </div>
-
-                          <div class="talents__joueur-talent-prochaine">
-                            <span>Prochaine distribution</span>
-
-                            <strong class="talents__joueur-talent-prochaine-date">
-                              ${
-                                prochaineDistribution
-                                  ? prochaineDistribution.toLocaleDateString("fr-FR", {
-                                      day: "2-digit",
-                                      month: "2-digit",
-                                      year: "numeric",
-                                    })
-                                  : "—"
-                              }
-                            </strong>
-                          </div>
-
-                        </div>
-                      </li>
-                    `;
-                  })
-                  .join("")}
-
-              </ul>
-            </div>
-          </div>
-        </li>
+          <ul class="talents__joueur-talents">
+            ${playerTalents}
+          </ul>
+        </article>
       `;
     })
     .join("");
