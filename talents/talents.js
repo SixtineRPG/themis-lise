@@ -235,10 +235,25 @@ function renderTalents(talents) {
 
           return config?.delai === delai;
         })
-        .map((talent) => {
-          const config = TARGET_TALENTS_BY_NAME.get(normalizeName(talent.nom));
+.map((talent) => {
+  const config = TARGET_TALENTS_BY_NAME.get(normalizeName(talent.nom));
 
-          return `
+  const category = TALENTS_OBJETS[normalizeName(talent.nom)];
+
+  // = Récupération de la dernière distribution.
+
+  const derniereDistribution = distributionsByKey.get(
+    `${player.id}::${normalizeName(talent.nom)}`
+  );
+
+  // = Calcul de la prochaine distribution.
+
+  const prochaineDistribution = getNextDistribution(
+    derniereDistribution,
+    config?.delai
+  );
+
+  return `
             <li class="talents__item">
               ${
                 talent.icon
@@ -462,21 +477,23 @@ function renderTalentsJoueurs(members, talents, distributions) {
 
 <div class="talents__joueur-talent-derniere-date">
   <span>Dernière distribution</span>
-  <strong>
-    ${formatDate(
-      distributionsByKey.get(
-        `${player.id}::${normalizeName(talent.nom)}`
-      )
-    )}
-  </strong>
+  <strong>${formatDate(derniereDistribution)}</strong>
 </div>
 
-  <div class="talents__joueur-talent-prochaine">
-    <span>Prochaine distribution</span>
-    <strong class="talents__joueur-talent-prochaine-date">
-      —
-    </strong>
-  </div>
+<div class="talents__joueur-talent-prochaine">
+  <span>Prochaine distribution</span>
+  <strong class="talents__joueur-talent-prochaine-date">
+    ${
+      prochaineDistribution
+        ? prochaineDistribution.toLocaleDateString("fr-FR", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+          })
+        : "—"
+    }
+  </strong>
+</div>
 
 </div>
                       </li>
@@ -575,59 +592,53 @@ talentsJoueurs.addEventListener("click", (event) => {
   if (!button) return;
 
   const talent = button.closest(".talents__joueur-talent");
+  const joueur = button.closest(".talents__joueur");
+
   const input = talent.querySelector(".talents__joueur-talent-date-input");
-  const output = talent.querySelector(".talents__joueur-talent-prochaine-date");
+
+  const derniereDate = talent.querySelector(
+    ".talents__joueur-talent-derniere-date strong"
+  );
+
+  const prochaineDate = talent.querySelector(
+    ".talents__joueur-talent-prochaine-date"
+  );
 
   if (!input.value) {
     input.reportValidity();
     return;
   }
 
-  // = Récupération de la date.
+  // = Récupération des informations.
 
-  const [year, month, day] = input.value.split("-").map(Number);
-  const date = new Date(year, month - 1, day);
-
-  // = Calcul du délai.
-
+  const joueurId = joueur.dataset.joueurId;
+  const talentName = talent.dataset.talent;
   const delai = talent.dataset.delai;
 
-  if (delai === "quinzaine") {
-    date.setDate(date.getDate() + 15);
-  }
+  // = Calcul de la prochaine distribution.
 
-  if (delai === "mensuel") {
-    const originalDay = date.getDate();
+  const prochaine = getNextDistribution(input.value, delai);
 
-    date.setDate(1);
-    date.setMonth(date.getMonth() + 1);
+  // = Affichage des dates.
 
-    const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+  derniereDate.textContent = formatDate(input.value);
 
-    date.setDate(Math.min(originalDay, lastDay));
-  }
-
-  // = Affichage de la prochaine distribution.
-
-  output.textContent = date.toLocaleDateString("fr-FR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  });
+  prochaineDate.textContent = prochaine
+    ? prochaine.toLocaleDateString("fr-FR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      })
+    : "—";
 
   // = Enregistrement de la modification.
 
-const joueur = button.closest(".talents__joueur");
-
-const joueurId = joueur.dataset.joueurId;
-const talentName = talent.dataset.talent;
-
-marquerModification(`${joueurId}::${talentName}`, {
-  type: "date",
-  joueur_id: joueurId,
-  talent: talentName,
-  derniere_distribution: input.value,
-});
+  marquerModification(`${joueurId}::${talentName}`, {
+    type: "date",
+    joueur_id: joueurId,
+    talent: talentName,
+    derniere_distribution: input.value,
+  });
 });
 
       // ==========================================================
