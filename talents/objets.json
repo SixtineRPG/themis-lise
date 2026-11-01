@@ -1752,7 +1752,9 @@
       "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/exp-share.png",
       "prix": "",
       "boutique": "indisponible"
-    },
+    }
+  ],
+  "cristal-z": [
     {
       "nom": "Normazélite",
       "description": "Cristal Z permettant une capacité Z du type correspondant.",
@@ -1997,7 +1999,9 @@
       "image": "https://raw.githubusercontent.com/msikma/pokesprite/master/items/z-crystals/ultranecrozium-z--held.png",
       "prix": "",
       "boutique": "indisponible"
-    },
+    }
+  ],
+  "mega-gemmes": [
     {
       "nom": "Florizarrite",
       "description": "Permet la Méga-Évolution du Pokémon correspondant.",
