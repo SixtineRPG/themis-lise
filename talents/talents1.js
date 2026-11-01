@@ -730,7 +730,7 @@ ${
         const playerElement = button.closest(".talents__joueur");
 
         const input = talentElement.querySelector("input[type='date']");
-        const nextDateElement = talentElement.querySelector(".talents__joueur-talent-next");
+        const nextDateElement = talentElement.querySelector(".talents__joueur-talent-prochaine-date");
 
         if (!input.value) {
           input.reportValidity();
@@ -744,7 +744,13 @@ ${
         const prochaineDistribution = getNextDistribution(input.value, delai);
 
 if (nextDateElement) {
-  nextDateElement.textContent = prochaineDistribution ? `Prochaine distribution : ${prochaineDistribution}` : "";
+  nextDateElement.textContent = prochaineDistribution
+    ? prochaineDistribution.toLocaleDateString("fr-FR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      })
+    : "—";
 }
         marquerModification(joueurId, talentName, {
           derniere_distribution: input.value,
