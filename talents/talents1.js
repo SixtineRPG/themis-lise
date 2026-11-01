@@ -752,6 +752,11 @@ if (nextDateElement) {
       })
     : "—";
 }
+
+        console.log("Joueur :", joueurId);
+console.log("Talent :", talentName);
+console.log("Élément joueur :", playerElement);
+console.log("Élément talent :", talentElement);
         marquerModification(joueurId, talentName, {
           derniere_distribution: input.value,
         });
