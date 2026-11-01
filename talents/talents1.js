@@ -1,3 +1,4 @@
+
 import { Button } from "https://sixtinerpg.github.io/themis-lise/components/buttons/buttons.js";
 import { Dropdown } from "https://sixtinerpg.github.io/themis-lise/components/dropdown/dropdown.js";
 
@@ -167,10 +168,17 @@ function escapeHtml(value = "") {
 
 // = Index des talents cibles.
 
-const TARGET_TALENTS_BY_NAME = new Map(Object.entries(TARGET_TALENTS).map(([name, config]) => [normalizeName(name), config]));
+const TARGET_TALENTS_BY_NAME = new Map(
+  Object.entries(TARGET_TALENTS).map(([name, config]) => [
+    normalizeName(name),
+    config,
+  ]),
+);
 
 function getTargetTalents(talents) {
-  return talents.filter((talent) => TARGET_TALENTS_BY_NAME.has(normalizeName(talent.nom)));
+  return talents.filter((talent) =>
+    TARGET_TALENTS_BY_NAME.has(normalizeName(talent.nom)),
+  );
 }
 
 // = Catégories d'objets associées aux talents.
@@ -223,11 +231,19 @@ function parseDate(value) {
     [, day, month, year] = match;
   }
 
-  const date = new Date(Number(year), Number(month) - 1, Number(day));
+  const date = new Date(
+    Number(year),
+    Number(month) - 1,
+    Number(day),
+  );
 
   // = Vérification de la date.
 
-  if (date.getFullYear() !== Number(year) || date.getMonth() !== Number(month) - 1 || date.getDate() !== Number(day)) {
+  if (
+    date.getFullYear() !== Number(year) ||
+    date.getMonth() !== Number(month) - 1 ||
+    date.getDate() !== Number(day)
+  ) {
     return null;
   }
 
@@ -269,7 +285,11 @@ function getNextDistribution(value, delai) {
     date.setDate(1);
     date.setMonth(date.getMonth() + 1);
 
-    const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+    const lastDay = new Date(
+      date.getFullYear(),
+      date.getMonth() + 1,
+      0,
+    ).getDate();
 
     date.setDate(Math.min(originalDay, lastDay));
   }
@@ -283,12 +303,20 @@ function getNextDistribution(value, delai) {
 
 const modificationsEnAttente = new Map();
 
-const synchroniserCompteur = document.querySelector("#synchroniser-compteur");
+const synchroniserCompteur = document.querySelector(
+  "#synchroniser-compteur",
+);
 
 // = Enregistrer une modification.
 
 function marquerModification(key, data) {
-  modificationsEnAttente.set(key, data);
+  const modificationExistante =
+    modificationsEnAttente.get(key) || {};
+
+  modificationsEnAttente.set(key, {
+    ...modificationExistante,
+    ...data,
+  });
 
   actualiserCompteur();
 }
@@ -300,7 +328,10 @@ function actualiserCompteur() {
 
   if (!synchroniserCompteur) return;
 
-  synchroniserCompteur.textContent = count > 0 ? `${count} modification${count > 1 ? "s" : ""} non enregistrée${count > 1 ? "s" : ""} sur Google Sheets` : "Aucune modification en attente";
+  synchroniserCompteur.textContent =
+    count > 0
+      ? `${count} modification${count > 1 ? "s" : ""} non enregistrée${count > 1 ? "s" : ""} sur Google Sheets`
+      : "Aucune modification en attente";
 }
 
 // = Avertissement avant de quitter.
@@ -329,12 +360,16 @@ function renderTalents(talents) {
     .map(({ delai, title }) => {
       const items = selectedTalents
         .filter((talent) => {
-          const config = TARGET_TALENTS_BY_NAME.get(normalizeName(talent.nom));
+          const config = TARGET_TALENTS_BY_NAME.get(
+            normalizeName(talent.nom),
+          );
 
           return config?.delai === delai;
         })
         .map((talent) => {
-          const config = TARGET_TALENTS_BY_NAME.get(normalizeName(talent.nom));
+          const config = TARGET_TALENTS_BY_NAME.get(
+            normalizeName(talent.nom),
+          );
 
           return `
             <li class="talents__item">
@@ -392,9 +427,15 @@ function renderTalents(talents) {
 function renderTalentsJoueurs(members, talents, distributions) {
   const selectedTalents = getTargetTalents(talents);
 
-  const talentsByName = new Map(selectedTalents.map((talent) => [normalizeName(talent.nom), talent]));
+  const talentsByName = new Map(
+    selectedTalents.map((talent) => [
+      normalizeName(talent.nom),
+      talent,
+    ]),
+  );
 
   // = Index des dernières distributions.
+
   const distributionsByKey = new Map(
     distributions.map((distribution) => [
       `${distribution.joueur_id}::${normalizeName(distribution.talent)}`,
@@ -406,10 +447,13 @@ function renderTalentsJoueurs(members, talents, distributions) {
   );
 
   // = Préparation des joueurs.
+
   const players = members
     .filter((member) => member.id !== "1")
     .map((member) => {
-      const playerTalents = (member.talents || []).map((name) => talentsByName.get(normalizeName(name))).filter(Boolean);
+      const playerTalents = (member.talents || [])
+        .map((name) => talentsByName.get(normalizeName(name)))
+        .filter(Boolean);
 
       return { ...member, talents: playerTalents };
     })
@@ -495,7 +539,9 @@ function renderTalentsJoueurs(members, talents, distributions) {
 
                 ${player.talents
                   .map((talent) => {
-                    const config = TARGET_TALENTS_BY_NAME.get(normalizeName(talent.nom));
+                    const config = TARGET_TALENTS_BY_NAME.get(
+                      normalizeName(talent.nom),
+                    );
 
                     const talentName = talent.nom;
                     const talentKey = normalizeName(talentName);
@@ -503,22 +549,37 @@ function renderTalentsJoueurs(members, talents, distributions) {
 
                     // = Récupération de la dernière distribution.
 
-                    const distribution = distributionsByKey.get(`${player.id}::${talentKey}`);
+                    const distribution = distributionsByKey.get(
+                      `${player.id}::${talentKey}`,
+                    );
 
-                    const derniereDistribution = distribution?.derniere_distribution;
+                    const derniereDistribution =
+                      distribution?.derniere_distribution;
 
                     const dernierItem = distribution?.dernier_item;
 
                     // = Recherche du dernier objet distribué.
 
-                    const dernierObjet = (objetsData[category] || []).find((objet) => normalizeName(objet.nom) === normalizeName(dernierItem || ""));
+                    const dernierObjet = (
+                      objetsData[category] || []
+                    ).find(
+                      (objet) =>
+                        normalizeName(objet.nom) ===
+                        normalizeName(dernierItem || ""),
+                    );
 
                     // = Calcul de la prochaine distribution.
 
-                    const prochaineDistribution = getNextDistribution(derniereDistribution, config?.delai);
+                    const prochaineDistribution = getNextDistribution(
+                      derniereDistribution,
+                      config?.delai,
+                    );
 
-                    const isCristalliseur = talentKey === normalizeName("Cristalliseur");
-                    const isJoaillier = talentKey === normalizeName("Joaillier");
+                    const isCristalliseur =
+                      talentKey === normalizeName("Cristalliseur");
+
+                    const isJoaillier =
+                      talentKey === normalizeName("Joaillier");
 
                     return `
                       <li
@@ -589,44 +650,42 @@ function renderTalentsJoueurs(members, talents, distributions) {
 
                         <!-- Génération de l'item aléatoire ou dropdowns -->
 
-<!-- Génération de l'item aléatoire -->
+                        <div class="talents__joueur-talent-generation">
 
-<div class="talents__joueur-talent-generation">
+                          ${
+                            category
+                              ? `
+                                <span
+                                  data-button="generate"
+                                  data-category="${escapeHtml(category)}"
+                                ></span>
+                              `
+                              : ""
+                          }
 
-  ${
-    category
-      ? `
-        <span
-          data-button="generate"
-          data-category="${escapeHtml(category)}"
-        ></span>
-      `
-      : ""
-  }
+                          ${
+                            isCristalliseur
+                              ? `
+                                <div
+                                  id="dropdown-cristalZ-${escapeHtml(player.id)}"
+                                  data-dropdown="cristal-z"
+                                ></div>
+                              `
+                              : ""
+                          }
 
-${
-  isCristalliseur
-    ? `
-      <div
-        id="dropdown-cristalZ-${escapeHtml(player.id)}"
-        data-dropdown="cristal-z"
-      ></div>
-    `
-    : ""
-}
+                          ${
+                            isJoaillier
+                              ? `
+                                <div
+                                  id="dropdown-megaGemmes-${escapeHtml(player.id)}"
+                                  data-dropdown="mega-gemmes"
+                                ></div>
+                              `
+                              : ""
+                          }
 
-${
-  isJoaillier
-    ? `
-      <div
-        id="dropdown-megaGemmes-${escapeHtml(player.id)}"
-        data-dropdown="mega-gemmes"
-      ></div>
-    `
-    : ""
-}
-
-</div>
+                        </div>
 
                         <!-- Distribution du talent -->
 
@@ -646,11 +705,14 @@ ${
                             <strong class="talents__joueur-talent-prochaine-date">
                               ${
                                 prochaineDistribution
-                                  ? prochaineDistribution.toLocaleDateString("fr-FR", {
-                                      day: "2-digit",
-                                      month: "2-digit",
-                                      year: "numeric",
-                                    })
+                                  ? prochaineDistribution.toLocaleDateString(
+                                      "fr-FR",
+                                      {
+                                        day: "2-digit",
+                                        month: "2-digit",
+                                        year: "numeric",
+                                      },
+                                    )
                                   : "—"
                               }
                             </strong>
@@ -673,138 +735,197 @@ ${
     })
     .join("");
 
-  // = Boutons de génération.
-  talentsJoueurs.querySelectorAll('[data-button="generate"]').forEach((placeholder) => {
-    const category = placeholder.dataset.category;
+  // ========================================================
+  // BOUTONS DE GÉNÉRATION
+  // ========================================================
 
-    const button = Button.create({
-      text: "Générer aléatoirement",
-      variant: "inset",
-      size: "sm",
-      icon: "fa-solid fa-dice",
-      iconPosition: "right",
-      feedback: "error",
-      errorText: "Aucun objet disponible",
-      className: "talents__generer",
+  talentsJoueurs
+    .querySelectorAll('[data-button="generate"]')
+    .forEach((placeholder) => {
+      const category = placeholder.dataset.category;
 
-      onClick: () => {
-        const availableObjects = objetsData[category] || [];
+      const button = Button.create({
+        text: "Générer aléatoirement",
+        variant: "inset",
+        size: "sm",
+        icon: "fa-solid fa-dice",
+        iconPosition: "right",
+        feedback: "error",
+        errorText: "Aucun objet disponible",
+        className: "talents__generer",
 
-        if (!availableObjects.length) {
-          throw new Error("Aucun objet disponible");
-        }
+        onClick: () => {
+          const availableObjects = objetsData[category] || [];
 
-        const objet = availableObjects[Math.floor(Math.random() * availableObjects.length)];
+          if (!availableObjects.length) {
+            throw new Error("Aucun objet disponible");
+          }
 
-        const talentElement = button.closest(".talents__joueur-talent");
+          const objet =
+            availableObjects[
+              Math.floor(Math.random() * availableObjects.length)
+            ];
 
-        talentElement.dataset.generatedItem = objet.nom;
+          const talentElement = button.closest(
+            ".talents__joueur-talent",
+          );
 
-        const result = document.createElement("div");
-        result.className = "talents__objet-result";
+          talentElement.dataset.generatedItem = objet.nom;
 
-        result.innerHTML = `
-          ${objet.image ? `<img src="${escapeHtml(objet.image)}" alt="">` : ""}
-          <span>${escapeHtml(objet.nom)}</span>
-        `;
+          const result = document.createElement("div");
+          result.className = "talents__objet-result";
 
-        button.replaceWith(result);
-      },
+          result.innerHTML = `
+            ${objet.image ? `<img src="${escapeHtml(objet.image)}" alt="">` : ""}
+            <span>${escapeHtml(objet.nom)}</span>
+          `;
+
+          button.replaceWith(result);
+        },
+      });
+
+      placeholder.replaceWith(button);
     });
 
-    placeholder.replaceWith(button);
-  });
+  // ========================================================
+  // BOUTONS D'ENREGISTREMENT DES DATES
+  // ========================================================
 
-  // = Boutons d'enregistrement des dates.
-  talentsJoueurs.querySelectorAll('[data-button="date-submit"]').forEach((placeholder) => {
-    const button = Button.create({
-      text: "Valider la date",
-      variant: "inset",
-      size: "sm",
-      feedback: "both",
-      successText: "Date enregistrée !",
-      errorText: "Date invalide !",
+  talentsJoueurs
+    .querySelectorAll('[data-button="date-submit"]')
+    .forEach((placeholder) => {
+      const button = Button.create({
+        text: "Valider la date",
+        variant: "inset",
+        size: "sm",
+        feedback: "both",
+        successText: "Date enregistrée !",
+        errorText: "Date invalide !",
 
-      onClick: () => {
-        const talentElement = button.closest(".talents__joueur-talent");
-        const playerElement = button.closest(".talents__joueur");
+        onClick: () => {
+          const talentElement = button.closest(
+            ".talents__joueur-talent",
+          );
 
-        const input = talentElement.querySelector("input[type='date']");
-        const nextDateElement = talentElement.querySelector(".talents__joueur-talent-prochaine-date");
+          const playerElement = button.closest(
+            ".talents__joueur",
+          );
 
-        if (!input.value) {
-          input.reportValidity();
-          return false;
-        }
+          const input = talentElement.querySelector(
+            "input[type='date']",
+          );
 
-        const joueurId = playerElement.dataset.joueurId;
-        const talentName = talentElement.dataset.talent;
-        const delai = talentElement.dataset.delai;
+          const nextDateElement = talentElement.querySelector(
+            ".talents__joueur-talent-prochaine-date",
+          );
 
-        const prochaineDistribution = getNextDistribution(input.value, delai);
+          if (!input.value) {
+            input.reportValidity();
+            return false;
+          }
 
-if (nextDateElement) {
-  nextDateElement.textContent = prochaineDistribution
-    ? prochaineDistribution.toLocaleDateString("fr-FR", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      })
-    : "—";
-}
+          const joueurId = playerElement.dataset.joueurId;
+          const talentName = talentElement.dataset.talent;
+          const delai = talentElement.dataset.delai;
 
-        console.log("Joueur :", joueurId);
-console.log("Talent :", talentName);
-console.log("Élément joueur :", playerElement);
-console.log("Élément talent :", talentElement);
-        marquerModification(joueurId, talentName, {
-          derniere_distribution: input.value,
-        });
+          const prochaineDistribution = getNextDistribution(
+            input.value,
+            delai,
+          );
 
-        updateDistributionDates();
-      },
+          // = Actualisation de la prochaine date.
+
+          if (nextDateElement) {
+            nextDateElement.textContent = prochaineDistribution
+              ? prochaineDistribution.toLocaleDateString(
+                  "fr-FR",
+                  {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                  },
+                )
+              : "—";
+          }
+
+          // = Enregistrement de la modification.
+
+          marquerModification(
+            `${joueurId}::${normalizeName(talentName)}`,
+            {
+              joueur_id: joueurId,
+              talent: talentName,
+              derniere_distribution: input.value,
+            },
+          );
+
+          updateDistributionDates();
+        },
+      });
+
+      placeholder.replaceWith(button);
     });
 
-    placeholder.replaceWith(button);
-  });
+  // ========================================================
+  // BOUTONS D'ENREGISTREMENT DES RÉCOMPENSES
+  // ========================================================
 
-  // = Boutons d'enregistrement des récompenses.
-  talentsJoueurs.querySelectorAll('[data-button="reward"]').forEach((placeholder) => {
-    const button = Button.create({
-      text: "Valider la récompense",
-      variant: "inset",
-      size: "sm",
-      feedback: "both",
-      successText: "Récompense enregistrée !",
-      errorText: "Générer un objet d'abord",
-      errorDuration: 1000,
+  talentsJoueurs
+    .querySelectorAll('[data-button="reward"]')
+    .forEach((placeholder) => {
+      const button = Button.create({
+        text: "Valider la récompense",
+        variant: "inset",
+        size: "sm",
+        feedback: "both",
+        successText: "Récompense enregistrée !",
+        errorText: "Générer un objet d'abord",
+        errorDuration: 1000,
 
-      onClick: () => {
-        const talentElement = button.closest(".talents__joueur-talent");
-        const playerElement = button.closest(".talents__joueur");
+        onClick: () => {
+          const talentElement = button.closest(
+            ".talents__joueur-talent",
+          );
 
-        const objetName = talentElement.dataset.generatedItem;
+          const playerElement = button.closest(
+            ".talents__joueur",
+          );
 
-        if (!objetName) {
-          return false;
-        }
+          const objetName = talentElement.dataset.generatedItem;
 
-        const joueurId = playerElement.dataset.joueurId;
-        const talentName = talentElement.dataset.talent;
+          if (!objetName) {
+            return false;
+          }
 
-        marquerModification(joueurId, talentName, {
-          dernier_item: objetName,
-        });
-      },
+          const joueurId = playerElement.dataset.joueurId;
+          const talentName = talentElement.dataset.talent;
+
+          // = Enregistrement de la modification.
+
+          marquerModification(
+            `${joueurId}::${normalizeName(talentName)}`,
+            {
+              joueur_id: joueurId,
+              talent: talentName,
+              dernier_item: objetName,
+            },
+          );
+        },
+      });
+
+      placeholder.replaceWith(button);
     });
 
-    placeholder.replaceWith(button);
-  });
+  // ========================================================
+  // MISE À JOUR DES DATES
+  // ========================================================
 
-  // = Mise à jour des dates.
   updateDistributionDates();
 
-  // = Init dropdown
+  // ========================================================
+  // INITIALISATION DES DROPDOWNS
+  // ========================================================
+
   initDropdownCristalZ(objetsData);
   initDropdownMegaGemmes(objetsData);
 }
@@ -817,44 +938,57 @@ function updateDistributionDates() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  document.querySelectorAll(".talents__joueur-talent-prochaine-date").forEach((element) => {
-    const date = parseDate(element.textContent.trim());
+  document
+    .querySelectorAll(".talents__joueur-talent-prochaine-date")
+    .forEach((element) => {
+      const date = parseDate(element.textContent.trim());
 
-    if (!date) return;
+      if (!date) return;
 
-    date.setHours(0, 0, 0, 0);
+      date.setHours(0, 0, 0, 0);
 
-    const difference = Math.round((date - today) / 86400000);
+      const difference = Math.round(
+        (date - today) / 86400000,
+      );
 
-    let status = "";
+      let status = "";
 
-    if (difference === 0) {
-      status = "today";
-    } else if (difference === -3) {
-      status = "3daysBefore";
-    } else if (difference === -1) {
-      status = "yesterday";
-    } else if (difference === 3) {
-      status = "3daysAfter";
-    }
+      if (difference === 0) {
+        status = "today";
+      } else if (difference === -3) {
+        status = "3daysBefore";
+      } else if (difference === -1) {
+        status = "yesterday";
+      } else if (difference === 3) {
+        status = "3daysAfter";
+      }
 
-    if (status) {
-      element.dataset.date = status;
-    } else {
-      delete element.dataset.date;
-    }
-  });
+      if (status) {
+        element.dataset.date = status;
+      } else {
+        delete element.dataset.date;
+      }
+    });
 }
 
 // ==========================================================
 // SYNCHRONISATION GOOGLE SHEETS
 // ==========================================================
 
-const GOOGLE_SHEETS_API_URL = "https://script.google.com/macros/s/AKfycby7sfWJyZ_2PMn1gm8MuaHk594uk6_dEUxTEEEV6j5Bo3lp2rgoBhcHPzbMmWSuGjtoGw/exec";
+const GOOGLE_SHEETS_API_URL =
+  "https://script.google.com/macros/s/AKfycby7sfWJyZ_2PMn1gm8MuaHk594uk6_dEUxTEEEV6j5Bo3lp2rgoBhcHPzbMmWSuGjtoGw/exec";
 
-const synchroniserButton = document.querySelector("#synchroniser-sheets");
-const synchroniserMessage = document.querySelector("#synchroniser-message");
-const synchroniserFrame = document.querySelector("#synchroniser-frame");
+const synchroniserButton = document.querySelector(
+  "#synchroniser-sheets",
+);
+
+const synchroniserMessage = document.querySelector(
+  "#synchroniser-message",
+);
+
+const synchroniserFrame = document.querySelector(
+  "#synchroniser-frame",
+);
 
 let synchronisationEnCours = null;
 
@@ -880,21 +1014,28 @@ document.body.appendChild(synchroniserForm);
 if (synchroniserButton) {
   synchroniserButton.addEventListener("click", () => {
     if (modificationsEnAttente.size === 0) {
-      synchroniserMessage.textContent = "Aucune modification à synchroniser.";
+      synchroniserMessage.textContent =
+        "Aucune modification à synchroniser.";
+
       return;
     }
 
     synchroniserButton.disabled = true;
-    synchroniserMessage.textContent = "Synchronisation en cours...";
+
+    synchroniserMessage.textContent =
+      "Synchronisation en cours...";
 
     const payload = {
       requestId: String(Date.now()),
-      modifications: Array.from(modificationsEnAttente.values()),
+      modifications: Array.from(
+        modificationsEnAttente.values(),
+      ),
     };
 
     synchronisationEnCours = payload.requestId;
 
     synchroniserPayload.value = JSON.stringify(payload);
+
     synchroniserForm.submit();
   });
 }
@@ -904,7 +1045,9 @@ if (synchroniserButton) {
 window.addEventListener("message", (event) => {
   // = Vérification de l'origine.
 
-  if (event.origin !== "https://sixtinerpg.github.io") return;
+  if (event.origin !== "https://sixtinerpg.github.io") {
+    return;
+  }
 
   const response = event.data;
 
@@ -913,7 +1056,10 @@ window.addEventListener("message", (event) => {
 
   // = Vérification de la requête.
 
-  if (response.requestId && response.requestId !== synchronisationEnCours) {
+  if (
+    response.requestId &&
+    response.requestId !== synchronisationEnCours
+  ) {
     return;
   }
 
@@ -923,13 +1069,16 @@ window.addEventListener("message", (event) => {
 
   if (response.success) {
     modificationsEnAttente.clear();
+
     actualiserCompteur();
 
-    synchroniserMessage.textContent = "Synchronisation terminée !";
+    synchroniserMessage.textContent =
+      "Synchronisation terminée !";
 
     synchroniserMessage.dataset.status = "success";
   } else {
-    synchroniserMessage.textContent = `Erreur : ${response.message || "Synchronisation impossible."}`;
+    synchroniserMessage.textContent =
+      `Erreur : ${response.message || "Synchronisation impossible."}`;
 
     synchroniserMessage.dataset.status = "error";
   }
@@ -944,19 +1093,26 @@ window.addEventListener("message", (event) => {
 // ==========================================================
 
 talentsJoueurs.addEventListener("click", (event) => {
-  const button = event.target.closest(".talents__joueur-toggle");
+  const button = event.target.closest(
+    ".talents__joueur-toggle",
+  );
 
   if (!button || !talentsJoueurs.contains(button)) return;
 
   const card = button.closest(".talents__joueur");
-  const details = card.querySelector(".talents__joueur-details");
+
+  const details = card.querySelector(
+    ".talents__joueur-details",
+  );
 
   if (!card || !details) return;
 
   const isOpen = card.classList.toggle("is-open");
 
   button.setAttribute("aria-expanded", String(isOpen));
+
   details.setAttribute("aria-hidden", String(!isOpen));
+
   details.inert = !isOpen;
 });
 
@@ -1001,11 +1157,19 @@ async function initDropdownJoueurs(members) {
     },
 
     // = Filtrage des joueurs.
+
     onChange: (selectedIds) => {
-      const cards = talentsJoueurs.querySelectorAll(".talents__joueur");
+      const cards = talentsJoueurs.querySelectorAll(
+        ".talents__joueur",
+      );
 
       cards.forEach((card) => {
-        const isVisible = selectedIds.length === 0 || selectedIds.some((id) => String(id) === String(card.dataset.joueurId));
+        const isVisible =
+          selectedIds.length === 0 ||
+          selectedIds.some(
+            (id) =>
+              String(id) === String(card.dataset.joueurId),
+          );
 
         card.hidden = !isVisible;
       });
@@ -1014,12 +1178,15 @@ async function initDropdownJoueurs(members) {
 }
 
 // ==========================================================
-// FILTRE DES MEGA GEMMES
+// FILTRE DES MÉGA-GEMMES
 // ==========================================================
+
 async function initDropdownMegaGemmes(objetsData) {
   const megaGemmes = objetsData["mega-gemmes"] || [];
 
-  const dropdowns = document.querySelectorAll('[data-dropdown="mega-gemmes"]');
+  const dropdowns = document.querySelectorAll(
+    '[data-dropdown="mega-gemmes"]',
+  );
 
   await Promise.all(
     [...dropdowns].map(async (dropdown) => {
@@ -1083,15 +1250,11 @@ async function initDropdownMegaGemmes(objetsData) {
 // ==========================================================
 
 async function initDropdownCristalZ(objetsData) {
-  console.log("Objets chargés :", objetsData);
-  console.log("Catégories disponibles :", Object.keys(objetsData));
   const cristauxZ = objetsData["cristal-z"] || [];
 
-  const dropdowns = document.querySelectorAll('[data-dropdown="cristal-z"]');
-
-  console.log("Cristaux Z :", cristauxZ);
-  console.log("Nombre de Cristaux Z :", cristauxZ.length);
-  console.log("Dropdowns trouvés :", dropdowns.length);
+  const dropdowns = document.querySelectorAll(
+    '[data-dropdown="cristal-z"]',
+  );
 
   await Promise.all(
     [...dropdowns].map(async (dropdown) => {
@@ -1156,18 +1319,39 @@ async function initDropdownCristalZ(objetsData) {
 
 async function initTalents() {
   try {
-    const [talentsData, membersData, objets, distributionsData] = await Promise.all([fetchJson(TALENTS_URL), fetchJson(MEMBERLIST_URL), fetchJson(OBJETS_URL), fetchJson(DISTRIBUTION_URL)]);
+    const [
+      talentsData,
+      membersData,
+      objets,
+      distributionsData,
+    ] = await Promise.all([
+      fetchJson(TALENTS_URL),
+      fetchJson(MEMBERLIST_URL),
+      fetchJson(OBJETS_URL),
+      fetchJson(DISTRIBUTION_URL),
+    ]);
 
-    const talents = Array.isArray(talentsData) ? talentsData : talentsData.talents;
+    const talents = Array.isArray(talentsData)
+      ? talentsData
+      : talentsData.talents;
 
-    const members = Array.isArray(membersData) ? membersData : membersData.members;
+    const members = Array.isArray(membersData)
+      ? membersData
+      : membersData.members;
 
-    const distributions = Array.isArray(distributionsData) ? distributionsData : [];
+    const distributions = Array.isArray(distributionsData)
+      ? distributionsData
+      : [];
 
     objetsData = objets;
 
     renderTalents(talents);
-    renderTalentsJoueurs(members, talents, distributions);
+
+    renderTalentsJoueurs(
+      members,
+      talents,
+      distributions,
+    );
 
     await initDropdownJoueurs(members);
   } catch (error) {
