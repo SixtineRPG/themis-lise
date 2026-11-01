@@ -743,8 +743,9 @@ ${
 
         const prochaineDistribution = getNextDistribution(input.value, delai);
 
-        nextDateElement.textContent = prochaineDistribution ? `Prochaine distribution : ${prochaineDistribution}` : "";
-
+if (nextDateElement) {
+  nextDateElement.textContent = prochaineDistribution ? `Prochaine distribution : ${prochaineDistribution}` : "";
+}
         marquerModification(joueurId, talentName, {
           derniere_distribution: input.value,
         });
