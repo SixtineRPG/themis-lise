@@ -851,13 +851,14 @@ function renderTalentsJoueurs(members, talents, distributions) {
           // = Enregistrement de la modification.
 
           marquerModification(
-            `${joueurId}::${normalizeName(talentName)}`,
-            {
-              joueur_id: joueurId,
-              talent: talentName,
-              derniere_distribution: input.value,
-            },
-          );
+  `${joueurId}::${normalizeName(talentName)}`,
+  {
+    joueur_id: joueurId,
+    talent: talentName,
+    type: "date",
+    derniere_distribution: input.value,
+  },
+);
 
           updateDistributionDates();
         },
@@ -903,13 +904,14 @@ function renderTalentsJoueurs(members, talents, distributions) {
           // = Enregistrement de la modification.
 
           marquerModification(
-            `${joueurId}::${normalizeName(talentName)}`,
-            {
-              joueur_id: joueurId,
-              talent: talentName,
-              dernier_item: objetName,
-            },
-          );
+  `${joueurId}::${normalizeName(talentName)}`,
+  {
+    joueur_id: joueurId,
+    talent: talentName,
+    type: "item",
+    dernier_item: objetName,
+  },
+);
         },
       });
 
