@@ -78,7 +78,7 @@ body[data-tool=talents] {
   margin: 0px 0px 10px 10px;
   font-weight: 400;
   line-height: 1.5;
-  color: #4a5864;
+  color: #575757;
   font-size: 0.75rem;
 }
 .talents__legend ::marker {
@@ -104,7 +104,7 @@ body[data-tool=talents] {
   grid-template-rows: auto 1fr;
   grid-template-columns: auto 1fr auto;
   align-items: start;
-  background: #f3f4f6;
+  background: #f5f5f5;
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
   padding: 0.75rem 1rem;
@@ -116,7 +116,7 @@ body[data-tool=talents] {
   grid-area: icon;
   width: 26px;
   height: 26px;
-  background: #e5e8eb;
+  background: #ededed;
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
   border-radius: 4px;
   padding: 0.25rem;
@@ -157,7 +157,7 @@ body[data-tool=talents] {
   grid-area: effet;
   margin: 0px;
   font-weight: 400;
-  color: #4a5864;
+  color: #575757;
   font-size: 0.75rem;
 }
 
@@ -171,12 +171,15 @@ body[data-tool=talents] {
   grid-template-columns: 64px minmax(0, 1fr) 44px;
   align-items: center;
   min-width: 0;
-  background: #f3f4f6;
+  background: #f5f5f5;
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
   padding: 1rem;
   border-left-width: 10px;
   border-left-style: solid;
+}
+.talents__joueur[hidden] {
+  display: none !important;
 }
 .talents__joueur-avatar {
   grid-area: avatar;
@@ -207,19 +210,19 @@ body[data-tool=talents] {
 .talents__joueur-rank {
   grid-area: rank;
   grid-area: rank;
-  background: #e5e8eb;
+  background: #ededed;
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
   font-weight: 700;
   text-transform: uppercase;
   border-radius: 999px;
-  color: #6a7581;
+  color: #767676;
   padding: 2px 8px;
   font-size: 0.875rem;
   font-size: 10px;
 }
 .talents__joueur-count {
   grid-area: count;
-  color: #6a7581;
+  color: #767676;
   font-size: 0.875rem;
 }
 .talents__joueur-preview {
@@ -233,7 +236,7 @@ body[data-tool=talents] {
 }
 .talents__joueur-badge {
   max-width: 100%;
-  background: #e5e8eb;
+  background: #ededed;
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
   border-radius: 999px;
   padding: 2px 8px;
@@ -246,7 +249,7 @@ body[data-tool=talents] {
   justify-self: center;
   width: 44px;
   height: 44px;
-  background: #e5e8eb;
+  background: #ededed;
   cursor: pointer;
   border-radius: 9999px;
   border: 1px solid rgba(9, 10, 11, 0.1);
@@ -283,9 +286,15 @@ body[data-tool=talents] {
   gap: 8px;
 }
 .talents__joueur-list .talents__joueur-talent {
-  display: flex;
+  display: grid;
+  justify-items: end;
+  grid-template-columns: 1fr auto auto;
+  grid-template-rows: repeat(2, 1fr);
+  grid-column-gap: 0px;
+  grid-row-gap: 0px;
+  grid-template-areas: "info generation historique" "info distribution distribution";
   align-items: center;
-  background: #e5e8eb;
+  background: #ededed;
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
   border-radius: 4px;
   padding: 8px 12px;
@@ -294,48 +303,112 @@ body[data-tool=talents] {
 .talents__joueur-list .talents__joueur-talent:first-child {
   margin-top: 10px;
 }
-.talents__joueur-list .talents__joueur-talent-icon {
-  background: rgba(9, 10, 11, 0.1);
+.talents__joueur-list .talents__joueur-talent span {
+  color: #292929;
+  font-size: 10px;
+  text-transform: uppercase;
+  font-weight: 700;
+  opacity: 0.5;
+}
+.talents__joueur-list .talents__joueur-talent strong {
+  line-height: 1;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+.talents__joueur-list .talents__joueur-talent img {
+  grid-area: icon;
+  background: #d6d6d6;
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
   border-radius: 4px;
   padding: 2px;
 }
 .talents__joueur-list .talents__joueur-talent-info {
+  grid-area: info;
   display: grid;
-  justify-items: start;
+  width: stretch;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: repeat(2, auto);
+  grid-column-gap: 6px;
+  grid-row-gap: 0px;
+  grid-template-areas: "icon name" "icon description";
 }
-.talents__joueur-list .talents__joueur-talent-description {
-  color: #1e2c38;
+.talents__joueur-list .talents__joueur-talent-info-icon {
+  grid-area: icon;
+  background: rgba(9, 10, 11, 0.1);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  padding: 2px;
+}
+.talents__joueur-list .talents__joueur-talent-info-name {
+  grid-area: name;
+}
+.talents__joueur-list .talents__joueur-talent-info-description {
+  grid-area: description;
+  color: #292929;
   font-size: 12px;
 }
 .talents__joueur-list .talents__joueur-talent-generation {
   margin-left: auto;
+  grid-area: generation;
+  display: flex;
 }
-.talents__joueur-list .talents__joueur-talent-generation button {
-  background: #323334;
-  color: #f9fafb;
-  padding: 6px 12px;
-  border-radius: 6px;
-  text-transform: uppercase;
-  border: none;
+.talents__joueur-list .talents__joueur-talent-historique {
+  grid-area: historique;
+  display: flex;
+  gap: 24px;
+  justify-content: flex-end;
+}
+.talents__joueur-list .talents__joueur-talent-historique-derniere-date {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+.talents__joueur-list .talents__joueur-talent-historique-dernier-item {
+  display: grid;
+  grid-template-columns: repeat(2, auto);
+  grid-template-rows: auto 1fr;
+  grid-column-gap: 6px;
+  grid-row-gap: 0px;
+  justify-items: end;
+  grid-template-areas: "title icon" "name icon";
+}
+.talents__joueur-list .talents__joueur-talent-historique-dernier-item-title {
+  grid-area: title;
+}
+.talents__joueur-list .talents__joueur-talent-historique-dernier-item-icon {
+  height: 25px;
+}
+.talents__joueur-list .talents__joueur-talent-historique-dernier-item-name {
+  grid-area: name;
+  line-height: 1;
+  font-size: 14px;
   font-weight: 700;
-  font-size: 10px;
-  font-family: "Inter", sans-serif;
-  transition: background-color 400ms ease;
 }
-.talents__joueur-list .talents__joueur-talent-generation button:after {
-  content: "\f061";
-  font-family: "Font Awesome 6 Free";
-  font-weight: 900;
-  margin-left: 8px;
-  display: inline-block;
-  transition: transform 400ms ease;
+.talents__joueur-list .talents__joueur-talent-distribution {
+  grid-area: distribution;
+  display: flex;
+  gap: 12px;
 }
-.talents__joueur-list .talents__joueur-talent-generation button:hover {
-  background: var(--bg-bleu);
+.talents__joueur-list .talents__joueur-talent-distribution-prochaine-date {
+  display: flex;
+  flex-direction: column;
+  border-right: 2px solid #dc7156;
+  padding-right: 12px;
+  align-items: flex-end;
 }
-.talents__joueur-list .talents__joueur-talent-generation button:hover:after {
-  transform: translateX(4px);
+.talents__joueur-list .talents__joueur-talent-distribution input {
+  background: #d6d6d6;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+  padding: 4px 12px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  font-size: 14px;
+  font-family: inter;
+  cursor: pointer;
+}
+.talents__joueur-list .talents__joueur-talent-distribution input:focus {
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.3);
+  outline: none;
 }
 .talents__objet-result {
   display: flex;
