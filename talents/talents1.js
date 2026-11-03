@@ -434,6 +434,11 @@ function renderTalentsJoueurs(members, talents, distributions) {
     ]),
   );
 
+  const hideLastItem = [
+  normalizeName("Prévoyant"),
+  normalizeName("Chef"),
+].includes(talentKey);
+
   // = Index des dernières distributions.
 
   const distributionsByKey = new Map(
@@ -633,27 +638,33 @@ const isTransmission =
                             </strong>
                           </div>
 
-                          <div class="talents__joueur-talent-historique-dernier-item">
-                            <span class="talents__joueur-talent-historique-dernier-item-title">
-                              Dernier objet distribué
-                            </span>
+                          ${
+  !hideLastItem
+    ? `
+      <div class="talents__joueur-talent-historique-dernier-item">
+        <span class="talents__joueur-talent-historique-dernier-item-title">
+          Dernier objet distribué
+        </span>
 
-                            ${
-                              dernierObjet?.image
-                                ? `
-                                  <img
-                                    class="talents__joueur-talent-historique-dernier-item-icon"
-                                    src="${escapeHtml(dernierObjet.image)}"
-                                    alt=""
-                                  >
-                                `
-                                : ""
-                            }
+        ${
+          dernierObjet?.image
+            ? `
+              <img
+                class="talents__joueur-talent-historique-dernier-item-icon"
+                src="${escapeHtml(dernierObjet.image)}"
+                alt=""
+              >
+            `
+            : ""
+        }
 
-                            <strong class="talents__joueur-talent-historique-dernier-item-name">
-                              ${escapeHtml(dernierItem || "—")}
-                            </strong>
-                          </div>
+        <strong class="talents__joueur-talent-historique-dernier-item-name">
+          ${escapeHtml(dernierItem || "—")}
+        </strong>
+      </div>
+    `
+    : ""
+}
 
                         </div>
 
