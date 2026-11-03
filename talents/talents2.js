@@ -1604,6 +1604,7 @@ async function initTalents() {
 initTalents();
 
 
+
 // ==========================================================
 // TEST — RELAIS FORUMACTIF
 // ==========================================================
@@ -1630,20 +1631,18 @@ async function testRelay() {
   }
 }
 
-// = Bouton de test
-
-const testButton = document.createElement("button");
-
-testButton.type = "button";
-testButton.textContent = "Tester le relais Themis";
-testButton.addEventListener("click", testRelay);
-
-document.body.appendChild(testButton);
-
-// = TEST PREVISUALISATION INVENTAIRE
+// ==========================================================
+// TEST — PREVISUALISATION INVENTAIRE
+// ==========================================================
 
 async function testInventoryPreview() {
   try {
+    // = Connexion au relais
+
+    await ForumAPI.connect();
+
+    // = Prévisualisation
+
     const result = await ForumAPI.previewInventory(
       123, // ID d'un joueur de test
       {
@@ -1658,3 +1657,25 @@ async function testInventoryPreview() {
     console.error("[TEST INVENTAIRE] Erreur :", error);
   }
 }
+
+// ==========================================================
+// TESTS — BOUTONS
+// ==========================================================
+
+const testRelayButton = document.createElement("button");
+
+testRelayButton.type = "button";
+testRelayButton.textContent = "Tester le relais Themis";
+testRelayButton.addEventListener("click", testRelay);
+
+document.body.appendChild(testRelayButton);
+
+// = Inventaire
+
+const testInventoryButton = document.createElement("button");
+
+testInventoryButton.type = "button";
+testInventoryButton.textContent = "Tester la prévisualisation inventaire";
+testInventoryButton.addEventListener("click", testInventoryPreview);
+
+document.body.appendChild(testInventoryButton);
