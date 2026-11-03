@@ -424,7 +424,7 @@ function renderTalents(talents) {
 // Sources : LOCAL
 // ==========================================================
 
-await function renderTalentsJoueurs(members, talents, distributions) {
+async function renderTalentsJoueurs(members, talents, distributions) {
   const selectedTalents = getTargetTalents(talents);
 
   const talentsByName = new Map(
