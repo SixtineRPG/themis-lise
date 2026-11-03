@@ -1,6 +1,6 @@
 import { Button } from "https://sixtinerpg.github.io/themis-lise/components/buttons/buttons.js";
 import { DateFilter } from "https://sixtinerpg.github.io/themis-lise/components/data-filter/data-filter.js";
-import { Dropdown } from "../../shared/components/dropdown/dropdown.js";
+import { Dropdown } from "https://sixtinerpg.github.io/themis-lise/components/dropdown/dropdown.js";
 import { ForumAPI } from "https://sixtinerpg.github.io/themis-lise/forum.js";
 // ==========================================================
 // CONFIGURATION
