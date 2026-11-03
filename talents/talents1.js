@@ -1,4 +1,3 @@
-
 import { Button } from "https://sixtinerpg.github.io/themis-lise/components/buttons/buttons.js";
 import { Dropdown } from "https://sixtinerpg.github.io/themis-lise/components/dropdown/dropdown.js";
 
@@ -168,17 +167,10 @@ function escapeHtml(value = "") {
 
 // = Index des talents cibles.
 
-const TARGET_TALENTS_BY_NAME = new Map(
-  Object.entries(TARGET_TALENTS).map(([name, config]) => [
-    normalizeName(name),
-    config,
-  ]),
-);
+const TARGET_TALENTS_BY_NAME = new Map(Object.entries(TARGET_TALENTS).map(([name, config]) => [normalizeName(name), config]));
 
 function getTargetTalents(talents) {
-  return talents.filter((talent) =>
-    TARGET_TALENTS_BY_NAME.has(normalizeName(talent.nom)),
-  );
+  return talents.filter((talent) => TARGET_TALENTS_BY_NAME.has(normalizeName(talent.nom)));
 }
 
 // = Catégories d'objets associées aux talents.
@@ -231,19 +223,11 @@ function parseDate(value) {
     [, day, month, year] = match;
   }
 
-  const date = new Date(
-    Number(year),
-    Number(month) - 1,
-    Number(day),
-  );
+  const date = new Date(Number(year), Number(month) - 1, Number(day));
 
   // = Vérification de la date.
 
-  if (
-    date.getFullYear() !== Number(year) ||
-    date.getMonth() !== Number(month) - 1 ||
-    date.getDate() !== Number(day)
-  ) {
+  if (date.getFullYear() !== Number(year) || date.getMonth() !== Number(month) - 1 || date.getDate() !== Number(day)) {
     return null;
   }
 
@@ -285,11 +269,7 @@ function getNextDistribution(value, delai) {
     date.setDate(1);
     date.setMonth(date.getMonth() + 1);
 
-    const lastDay = new Date(
-      date.getFullYear(),
-      date.getMonth() + 1,
-      0,
-    ).getDate();
+    const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
 
     date.setDate(Math.min(originalDay, lastDay));
   }
@@ -303,15 +283,12 @@ function getNextDistribution(value, delai) {
 
 const modificationsEnAttente = new Map();
 
-const synchroniserCompteur = document.querySelector(
-  "#synchroniser-compteur",
-);
+const synchroniserCompteur = document.querySelector("#synchroniser-compteur");
 
 // = Enregistrer une modification.
 
 function marquerModification(key, data) {
-  const modificationExistante =
-    modificationsEnAttente.get(key) || {};
+  const modificationExistante = modificationsEnAttente.get(key) || {};
 
   modificationsEnAttente.set(key, {
     ...modificationExistante,
@@ -328,10 +305,7 @@ function actualiserCompteur() {
 
   if (!synchroniserCompteur) return;
 
-  synchroniserCompteur.textContent =
-    count > 0
-      ? `${count} modification${count > 1 ? "s" : ""} non enregistrée${count > 1 ? "s" : ""} sur Google Sheets`
-      : "Aucune modification en attente";
+  synchroniserCompteur.textContent = count > 0 ? `${count} modification${count > 1 ? "s" : ""} non enregistrée${count > 1 ? "s" : ""} sur Google Sheets` : "Aucune modification en attente";
 }
 
 // = Avertissement avant de quitter.
@@ -360,16 +334,12 @@ function renderTalents(talents) {
     .map(({ delai, title }) => {
       const items = selectedTalents
         .filter((talent) => {
-          const config = TARGET_TALENTS_BY_NAME.get(
-            normalizeName(talent.nom),
-          );
+          const config = TARGET_TALENTS_BY_NAME.get(normalizeName(talent.nom));
 
           return config?.delai === delai;
         })
         .map((talent) => {
-          const config = TARGET_TALENTS_BY_NAME.get(
-            normalizeName(talent.nom),
-          );
+          const config = TARGET_TALENTS_BY_NAME.get(normalizeName(talent.nom));
 
           return `
             <li class="talents__item">
@@ -427,14 +397,7 @@ function renderTalents(talents) {
 async function renderTalentsJoueurs(members, talents, distributions) {
   const selectedTalents = getTargetTalents(talents);
 
-  const talentsByName = new Map(
-    selectedTalents.map((talent) => [
-      normalizeName(talent.nom),
-      talent,
-    ]),
-  );
-
-
+  const talentsByName = new Map(selectedTalents.map((talent) => [normalizeName(talent.nom), talent]));
 
   // = Index des dernières distributions.
 
@@ -453,9 +416,7 @@ async function renderTalentsJoueurs(members, talents, distributions) {
   const players = members
     .filter((member) => member.id !== "1")
     .map((member) => {
-      const playerTalents = (member.talents || [])
-        .map((name) => talentsByName.get(normalizeName(name)))
-        .filter(Boolean);
+      const playerTalents = (member.talents || []).map((name) => talentsByName.get(normalizeName(name))).filter(Boolean);
 
       return { ...member, talents: playerTalents };
     })
@@ -541,77 +502,60 @@ async function renderTalentsJoueurs(members, talents, distributions) {
 
                 ${player.talents
                   .map((talent) => {
-                    const config = TARGET_TALENTS_BY_NAME.get(
-                      normalizeName(talent.nom),
-                    );
+                    const config = TARGET_TALENTS_BY_NAME.get(normalizeName(talent.nom));
 
-const talentName = talent.nom;
-const talentKey = normalizeName(talentName);
+                    const talentName = talent.nom;
+                    const talentKey = normalizeName(talentName);
 
-const hideLastItem = [
-  normalizeName("Prévoyant"),
-  normalizeName("Chef"),
-].includes(talentKey);
-                    
+                    const hideLastItem = [normalizeName("Prévoyant"), normalizeName("Chef")].includes(talentKey);
+
                     const category = TALENTS_OBJETS[talentKey];
 
                     // = Récupération de la dernière distribution.
 
-                    const distribution = distributionsByKey.get(
-                      `${player.id}::${talentKey}`,
-                    );
+                    const distribution = distributionsByKey.get(`${player.id}::${talentKey}`);
 
-                    const derniereDistribution =
-                      distribution?.derniere_distribution;
+                    const derniereDistribution = distribution?.derniere_distribution;
 
                     const dernierItem = distribution?.dernier_item;
 
                     // = Recherche du dernier objet distribué.
 
-                    const dernierObjet = (
-                      objetsData[category] || []
-                    ).find(
-                      (objet) =>
-                        normalizeName(objet.nom) ===
-                        normalizeName(dernierItem || ""),
-                    );
+                    const dernierObjet = (objetsData[category] || []).find((objet) => normalizeName(objet.nom) === normalizeName(dernierItem || ""));
 
                     // = Calcul de la prochaine distribution.
 
-                    const prochaineDistribution = getNextDistribution(
-                      derniereDistribution,
-                      config?.delai,
+                    const prochaineDistribution = getNextDistribution(derniereDistribution, config?.delai);
+
+                    // = Identification des talents.
+
+                    const isCristalliseur = talentKey === normalizeName("Cristalliseur");
+
+                    const isJoaillier = talentKey === normalizeName("Joaillier");
+
+                    const isGraveurCD = talentKey === normalizeName("Graveur de CD");
+
+                    const isPousseurDeFonte = talentKey === normalizeName("Pousseur de fonte");
+
+                    const isPrincesse = talentKey === normalizeName("Princesse");
+
+                    const isPasseurDeSavoir = talentKey === normalizeName("Passeur de savoir");
+
+                    const isMentor = talentKey === normalizeName("Mentor");
+
+                    const isTransmission = talentKey === normalizeName("Transmission");
+
+                    const isAimantRaretes = talentKey === normalizeName("Aimant à raretés");
+
+                    const isCTDouteuse = talentKey === normalizeName("CT Douteuse");
+
+                    const isDonneurCapacites = talentKey === normalizeName("Donneur de capacités");
+
+                    // = Talents qui modifient directement l'inventaire.
+
+                    const hasInventoryReward = ["Prévoyant", "Fana de l’évolution", "Graveur de CD", "Docteur du Jurassique", "Cristalliseur", "Joaillier", "Pousseur de fonte", "Princesse"].some(
+                      (name) => talentKey === normalizeName(name),
                     );
-
-                    const isCristalliseur =
-                      talentKey === normalizeName("Cristalliseur");
-
-                    const isJoaillier =
-                      talentKey === normalizeName("Joaillier");
-
-                    const isPousseurDeFonte =
-  talentKey === normalizeName("Pousseur de fonte");
-
-const isPrincesse =
-  talentKey === normalizeName("Princesse");
-
-                    const isPasseurDeSavoir =
-  talentKey === normalizeName("Passeur de savoir");
-
-const isMentor =
-  talentKey === normalizeName("Mentor");
-
-const isTransmission =
-  talentKey === normalizeName("Transmission");
-
-                    const isAimantRaretes =
-  talentKey === normalizeName("Aimant à raretés");
-
-const isCTDouteuse =
-  talentKey === normalizeName("CT Douteuse");
-
-const isDonneurCapacites =
-  talentKey === normalizeName("Donneur de capacités");
 
                     return `
                       <li
@@ -657,32 +601,52 @@ const isDonneurCapacites =
                           </div>
 
                           ${
-  !hideLastItem
-    ? `
-      <div class="talents__joueur-talent-historique-dernier-item">
-        <span class="talents__joueur-talent-historique-dernier-item-title">
-          Dernier objet distribué
-        </span>
+                            !hideLastItem
+                              ? `
+                                <div class="talents__joueur-talent-historique-dernier-item">
+                                  <span class="talents__joueur-talent-historique-dernier-item-title">
+                                    Dernier objet distribué
+                                  </span>
 
-        ${
-          dernierObjet?.image
-            ? `
-              <img
-                class="talents__joueur-talent-historique-dernier-item-icon"
-                src="${escapeHtml(dernierObjet.image)}"
-                alt=""
-              >
-            `
-            : ""
-        }
+                                  ${
+                                    isAimantRaretes
+                                      ? `
+                                        <strong class="talents__joueur-talent-historique-dernier-item-name">
+                                          ${
+                                            dernierItem
+                                              ? `
+                                                <a
+                                                  href="${escapeHtml(dernierItem)}"
+                                                  target="_blank"
+                                                  rel="noopener noreferrer"
+                                                >lien de la capture</a>
+                                              `
+                                              : "—"
+                                          }
+                                        </strong>
+                                      `
+                                      : `
+                                        ${
+                                          dernierObjet?.image
+                                            ? `
+                                              <img
+                                                class="talents__joueur-talent-historique-dernier-item-icon"
+                                                src="${escapeHtml(dernierObjet.image)}"
+                                                alt=""
+                                              >
+                                            `
+                                            : ""
+                                        }
 
-        <strong class="talents__joueur-talent-historique-dernier-item-name">
-          ${escapeHtml(dernierItem || "—")}
-        </strong>
-      </div>
-    `
-    : ""
-}
+                                        <strong class="talents__joueur-talent-historique-dernier-item-name">
+                                          ${escapeHtml(dernierItem || "—")}
+                                        </strong>
+                                      `
+                                  }
+                                </div>
+                              `
+                              : ""
+                          }
 
                         </div>
 
@@ -724,87 +688,98 @@ const isDonneurCapacites =
                           }
 
                           ${
-  isPousseurDeFonte
-    ? `
-      <div
-        id="dropdown-dynamax-${escapeHtml(player.id)}"
-        data-dropdown="dynamax"
-      ></div>
-    `
-    : ""
-}
-
-${
-  isPrincesse
-    ? `
-      <div
-        id="dropdown-teracristal-${escapeHtml(player.id)}"
-        data-dropdown="teracristal"
-      ></div>
-    `
-    : ""
-}
+                            isPousseurDeFonte
+                              ? `
+                                <div
+                                  id="dropdown-dynamax-${escapeHtml(player.id)}"
+                                  data-dropdown="dynamax"
+                                ></div>
+                              `
+                              : ""
+                          }
 
                           ${
-  isPasseurDeSavoir
-    ? `
+                            isPrincesse
+                              ? `
+                                <div
+                                  id="dropdown-teracristal-${escapeHtml(player.id)}"
+                                  data-dropdown="teracristal"
+                                ></div>
+                              `
+                              : ""
+                          }
+
+                          ${
+                            isGraveurCD
+                              ? `
       <div
-        id="dropdown-passeur-${escapeHtml(player.id)}"
-        data-dropdown="passeur"
+        id="dropdown-ct-${escapeHtml(player.id)}"
+        data-dropdown="ct"
       ></div>
     `
-    : ""
-}
+                              : ""
+                          }
 
-${
-  isMentor
-    ? `
-      <div
-        id="dropdown-mentor-${escapeHtml(player.id)}"
-        data-dropdown="mentor"
-      ></div>
-    `
-    : ""
-}
+                          ${
+                            isPasseurDeSavoir
+                              ? `
+                                <div
+                                  id="dropdown-passeur-${escapeHtml(player.id)}"
+                                  data-dropdown="passeur"
+                                ></div>
+                              `
+                              : ""
+                          }
 
-${
-  isTransmission
-    ? `
-      <div
-        id="dropdown-transmission-${escapeHtml(player.id)}"
-        data-dropdown="transmission"
-      ></div>
-    `
-    : ""
-}
+                          ${
+                            isMentor
+                              ? `
+                                <div
+                                  id="dropdown-mentor-${escapeHtml(player.id)}"
+                                  data-dropdown="mentor"
+                                ></div>
+                              `
+                              : ""
+                          }
 
-${
-  isAimantRaretes
-    ? `
-      <input
-        class="talents__joueur-talent-input"
-        type="url"
-        placeholder="URL"
-        aria-label="URL de la capture"
-        required
-      >
-    `
-    : ""
-}
+                          ${
+                            isTransmission
+                              ? `
+                                <div
+                                  id="dropdown-transmission-${escapeHtml(player.id)}"
+                                  data-dropdown="transmission"
+                                ></div>
+                              `
+                              : ""
+                          }
 
-${
-  isCTDouteuse || isDonneurCapacites
-    ? `
-      <input
-        class="talents__joueur-talent-input"
-        type="text"
-        placeholder="Saisir une valeur"
-        aria-label="Valeur de la récompense"
-        required
-      >
-    `
-    : ""
-}
+                          ${
+                            isAimantRaretes
+                              ? `
+                                <input
+                                  class="talents__joueur-talent-input"
+                                  type="url"
+                                  placeholder="URL"
+                                  aria-label="URL de la capture"
+                                  required
+                                >
+                              `
+                              : ""
+                          }
+
+                          ${
+                            isCTDouteuse || isDonneurCapacites
+                              ? `
+                                <input
+                                  class="talents__joueur-talent-input"
+                                  type="text"
+                                  placeholder="Saisir une valeur"
+                                  aria-label="Valeur de la récompense"
+                                  required
+                                >
+                              `
+                              : ""
+                          }
 
                         </div>
 
@@ -826,20 +801,17 @@ ${
                             <strong class="talents__joueur-talent-prochaine-date">
                               ${
                                 prochaineDistribution
-                                  ? prochaineDistribution.toLocaleDateString(
-                                      "fr-FR",
-                                      {
-                                        day: "2-digit",
-                                        month: "2-digit",
-                                        year: "numeric",
-                                      },
-                                    )
+                                  ? prochaineDistribution.toLocaleDateString("fr-FR", {
+                                      day: "2-digit",
+                                      month: "2-digit",
+                                      year: "numeric",
+                                    })
                                   : "—"
                               }
                             </strong>
                           </div>
 
-                          <span data-button="reward"></span>
+                          ${hasInventoryReward ? `<span data-button="reward"></span>` : ""}
 
                         </div>
 
@@ -860,141 +832,113 @@ ${
   // BOUTONS DE GÉNÉRATION
   // ========================================================
 
-  talentsJoueurs
-    .querySelectorAll('[data-button="generate"]')
-    .forEach((placeholder) => {
-      const category = placeholder.dataset.category;
+  talentsJoueurs.querySelectorAll('[data-button="generate"]').forEach((placeholder) => {
+    const category = placeholder.dataset.category;
 
-      const button = Button.create({
-        text: "Générer aléatoirement",
-        variant: "inset",
-        size: "sm",
-        icon: "fa-solid fa-dice",
-        iconPosition: "right",
-        feedback: "error",
-        errorText: "Aucun objet disponible",
-        className: "talents__generer",
+    const button = Button.create({
+      text: "Générer aléatoirement",
+      variant: "inset",
+      size: "sm",
+      icon: "fa-solid fa-dice",
+      iconPosition: "right",
+      feedback: "error",
+      errorText: "Aucun objet disponible",
+      className: "talents__generer",
 
-        onClick: () => {
-          const availableObjects = objetsData[category] || [];
+      onClick: () => {
+        const availableObjects = objetsData[category] || [];
 
-          if (!availableObjects.length) {
-            throw new Error("Aucun objet disponible");
-          }
+        if (!availableObjects.length) {
+          throw new Error("Aucun objet disponible");
+        }
 
-          const objet =
-            availableObjects[
-              Math.floor(Math.random() * availableObjects.length)
-            ];
+        const objet = availableObjects[Math.floor(Math.random() * availableObjects.length)];
 
-          const talentElement = button.closest(
-            ".talents__joueur-talent",
-          );
+        const talentElement = button.closest(".talents__joueur-talent");
 
-          talentElement.dataset.generatedItem = objet.nom;
+        talentElement.dataset.generatedItem = objet.nom;
 
-          const result = document.createElement("div");
-          result.className = "talents__objet-result";
+        const result = document.createElement("div");
+        result.className = "talents__objet-result";
 
-          result.innerHTML = `
-            ${objet.image ? `<img src="${escapeHtml(objet.image)}" alt="">` : ""}
-            <span>${escapeHtml(objet.nom)}</span>
-          `;
+        result.innerHTML = `
+          ${objet.image ? `<img src="${escapeHtml(objet.image)}" alt="">` : ""}
+          <span>${escapeHtml(objet.nom)}</span>
+        `;
 
-          button.replaceWith(result);
-        },
-      });
-
-      placeholder.replaceWith(button);
+        button.replaceWith(result);
+      },
     });
+
+    placeholder.replaceWith(button);
+  });
 
   // ========================================================
   // BOUTONS D'ENREGISTREMENT DES DATES
   // ========================================================
 
-  talentsJoueurs
-    .querySelectorAll('[data-button="date-submit"]')
-    .forEach((placeholder) => {
-      const button = Button.create({
-        text: "Valider la date",
-        variant: "inset",
-        size: "sm",
-        feedback: "both",
-        successText: "Date enregistrée !",
-        errorText: "Date invalide !",
+  talentsJoueurs.querySelectorAll('[data-button="date-submit"]').forEach((placeholder) => {
+    const button = Button.create({
+      text: "Valider la date",
+      variant: "inset",
+      size: "sm",
+      feedback: "both",
+      successText: "Date enregistrée !",
+      errorText: "Date invalide !",
 
-        onClick: () => {
-          const talentElement = button.closest(
-            ".talents__joueur-talent",
-          );
+      onClick: () => {
+        const talentElement = button.closest(".talents__joueur-talent");
 
-          const playerElement = button.closest(
-            ".talents__joueur",
-          );
+        const playerElement = button.closest(".talents__joueur");
 
-          const input = talentElement.querySelector(
-            "input[type='date']",
-          );
+        const input = talentElement.querySelector("input[type='date']");
 
-          const nextDateElement = talentElement.querySelector(
-            ".talents__joueur-talent-prochaine-date",
-          );
+        const nextDateElement = talentElement.querySelector(".talents__joueur-talent-prochaine-date");
 
-          if (!input.value) {
-            input.reportValidity();
-            return false;
-          }
+        if (!input.value) {
+          input.reportValidity();
+          return false;
+        }
 
-          const joueurId = playerElement.dataset.joueurId;
-          const talentName = talentElement.dataset.talent;
-          const delai = talentElement.dataset.delai;
+        const joueurId = playerElement.dataset.joueurId;
+        const talentName = talentElement.dataset.talent;
+        const delai = talentElement.dataset.delai;
 
-          const prochaineDistribution = getNextDistribution(
-            input.value,
-            delai,
-          );
+        const prochaineDistribution = getNextDistribution(input.value, delai);
 
-          // = Actualisation de la prochaine date.
+        // = Actualisation de la prochaine date.
 
-          if (nextDateElement) {
-            nextDateElement.textContent = prochaineDistribution
-              ? prochaineDistribution.toLocaleDateString(
-                  "fr-FR",
-                  {
-                    day: "2-digit",
-                    month: "2-digit",
-                    year: "numeric",
-                  },
-                )
-              : "—";
-          }
+        if (nextDateElement) {
+          nextDateElement.textContent = prochaineDistribution
+            ? prochaineDistribution.toLocaleDateString("fr-FR", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+              })
+            : "—";
+        }
 
-          // = Enregistrement de la modification.
+        // = Enregistrement de la modification.
 
-          marquerModification(
-  `${joueurId}::${normalizeName(talentName)}`,
-  {
-    joueur_id: joueurId,
-    talent: talentName,
-    type: "date",
-    derniere_distribution: input.value,
-  },
-);
+        marquerModification(`${joueurId}::${normalizeName(talentName)}`, {
+          joueur_id: joueurId,
+          talent: talentName,
+          type: "date",
+          derniere_distribution: input.value,
+        });
 
-          updateDistributionDates();
-        },
-      });
-
-      placeholder.replaceWith(button);
+        updateDistributionDates();
+      },
     });
 
-// ========================================================
-// BOUTONS D'ENREGISTREMENT DES RÉCOMPENSES
-// ========================================================
+    placeholder.replaceWith(button);
+  });
 
-talentsJoueurs
-  .querySelectorAll('[data-button="reward"]')
-  .forEach((placeholder) => {
+  // ========================================================
+  // BOUTONS D'ENREGISTREMENT DES RÉCOMPENSES
+  // ========================================================
+
+  talentsJoueurs.querySelectorAll('[data-button="reward"]').forEach((placeholder) => {
     const button = Button.create({
       text: "Valider la récompense",
       variant: "inset",
@@ -1005,13 +949,9 @@ talentsJoueurs
       errorDuration: 1000,
 
       onClick: () => {
-        const talentElement = button.closest(
-          ".talents__joueur-talent",
-        );
+        const talentElement = button.closest(".talents__joueur-talent");
 
-        const playerElement = button.closest(
-          ".talents__joueur",
-        );
+        const playerElement = button.closest(".talents__joueur");
 
         const talentName = talentElement.dataset.talent;
         const talentKey = normalizeName(talentName);
@@ -1020,105 +960,87 @@ talentsJoueurs
 
         // = Récupération de l'objet généré ou sélectionné.
 
-const dropdownItem = talentElement.querySelector(
-  '[data-dropdown="cristal-z"] .dropdown__trigger .dropdown__member span, ' +
-  '[data-dropdown="mega-gemmes"] .dropdown__trigger .dropdown__member span, ' +
-  '[data-dropdown="dynamax"] .dropdown__trigger .dropdown__member span, ' +
-  '[data-dropdown="teracristal"] .dropdown__trigger .dropdown__member span',
-);
+        const dropdownItem = talentElement.querySelector(
+          '[data-dropdown="cristal-z"] .dropdown__trigger .dropdown__member span, ' +
+            '[data-dropdown="mega-gemmes"] .dropdown__trigger .dropdown__member span, ' +
+            '[data-dropdown="dynamax"] .dropdown__trigger .dropdown__member span, ' +
+            '[data-dropdown="teracristal"] .dropdown__trigger .dropdown__member span, ' +
+            '[data-dropdown="ct"] .dropdown__trigger .dropdown__member span',
+        );
 
-        const objetName =
-          talentElement.dataset.generatedItem ||
-          dropdownItem?.textContent.trim();
+        const objetName = talentElement.dataset.generatedItem || dropdownItem?.textContent.trim();
 
         // = Récupération du joueur sélectionné.
 
-        const joueurSelectionne = talentElement.querySelector(
-          '[data-dropdown="passeur"] .dropdown__trigger .dropdown__member span, ' +
-          '[data-dropdown="mentor"] .dropdown__trigger .dropdown__member span, ' +
-          '[data-dropdown="transmission"] .dropdown__trigger .dropdown__member span',
-        )?.textContent.trim();
+        const joueurSelectionne = talentElement
+          .querySelector(
+            '[data-dropdown="passeur"] .dropdown__trigger .dropdown__member span, ' +
+              '[data-dropdown="mentor"] .dropdown__trigger .dropdown__member span, ' +
+              '[data-dropdown="transmission"] .dropdown__trigger .dropdown__member span',
+          )
+          ?.textContent.trim();
 
-        const inputValeur = talentElement.querySelector(
-  ".talents__joueur-talent-input",
-);
+        const inputValeur = talentElement.querySelector(".talents__joueur-talent-input");
 
-const valeurInput = inputValeur?.value.trim();
+        const valeurInput = inputValeur?.value.trim();
 
-        const talentsJoueursCibles = [
-          normalizeName("Passeur de savoir"),
-          normalizeName("Mentor"),
-          normalizeName("Transmission"),
-        ];
+        const talentsJoueursCibles = [normalizeName("Passeur de savoir"), normalizeName("Mentor"), normalizeName("Transmission")];
 
-        const isTalentJoueur = talentsJoueursCibles.includes(
-          talentKey,
+        const isTalentJoueur = talentsJoueursCibles.includes(talentKey);
+
+        const hasDropdown = talentElement.querySelector(
+          '[data-dropdown="cristal-z"], ' +
+            '[data-dropdown="mega-gemmes"], ' +
+            '[data-dropdown="dynamax"], ' +
+            '[data-dropdown="teracristal"], ' +
+            '[data-dropdown="ct"], ' +
+            '[data-dropdown="passeur"], ' +
+            '[data-dropdown="mentor"], ' +
+            '[data-dropdown="transmission"]',
         );
 
-const hasDropdown = talentElement.querySelector(
-  '[data-dropdown="cristal-z"], ' +
-  '[data-dropdown="mega-gemmes"], ' +
-  '[data-dropdown="dynamax"], ' +
-  '[data-dropdown="teracristal"], ' +
-  '[data-dropdown="passeur"], ' +
-  '[data-dropdown="mentor"], ' +
-  '[data-dropdown="transmission"]',
-);
+        const hasGenerator = talentElement.querySelector('[data-button="generate"], .talents__objet-result');
 
-const hasGenerator = talentElement.querySelector(
-  '[data-button="generate"], .talents__objet-result',
-);
+        const hasInput = talentElement.querySelector("input:not([type='date']), select, textarea");
 
-const hasInput = talentElement.querySelector(
-  "input:not([type='date']), select, textarea",
-);
+        const hasRewardSelection = hasDropdown || hasGenerator || hasInput;
 
-const hasRewardSelection =
-  hasDropdown || hasGenerator || hasInput;
+        const valeur = inputValeur ? valeurInput : isTalentJoueur ? joueurSelectionne : objetName;
 
-const valeur = inputValeur
-  ? valeurInput
-  : isTalentJoueur
-    ? joueurSelectionne
-    : objetName;
+        // = Vérification du format de l'URL.
 
-// = Vérification du format de l'URL.
+        if (inputValeur?.type === "url") {
+          try {
+            const url = new URL(valeur);
 
-if (inputValeur?.type === "url") {
-  try {
-    const url = new URL(valeur);
+            if (!["http:", "https:"].includes(url.protocol)) {
+              inputValeur.reportValidity();
+              return false;
+            }
+          } catch {
+            inputValeur.reportValidity();
+            return false;
+          }
+        }
 
-    if (!["http:", "https:"].includes(url.protocol)) {
-      inputValeur.reportValidity();
-      return false;
-    }
-  } catch {
-    inputValeur.reportValidity();
-    return false;
-  }
-}
+        // = Vérification de la saisie ou de la sélection.
 
-// = Vérification de la saisie ou de la sélection.
+        if (hasRewardSelection && !valeur) {
+          if (inputValeur) {
+            inputValeur.reportValidity();
+          }
 
-if (hasRewardSelection && !valeur) {
-  if (inputValeur) {
-    inputValeur.reportValidity();
-  }
-
-  return false;
-}
+          return false;
+        }
 
         // = Enregistrement de la modification.
 
-        marquerModification(
-          `${joueurId}::${talentKey}`,
-          {
-            joueur_id: joueurId,
-            talent: talentName,
-            type: isTalentJoueur ? "joueur" : "item",
-            dernier_item: valeur || "",
-          },
-        );
+        marquerModification(`${joueurId}::${talentKey}`, {
+          joueur_id: joueurId,
+          talent: talentName,
+          type: isTalentJoueur ? "joueur" : "item",
+          dernier_item: valeur || "",
+        });
       },
     });
 
@@ -1135,8 +1057,8 @@ if (hasRewardSelection && !valeur) {
   // INITIALISATION DES DROPDOWNS
   // ========================================================
 
-await initDropdownObjets(objetsData);
-await initDropdownTalents(members);
+  await initDropdownObjets(objetsData);
+  await initDropdownTalents(members);
 }
 
 // ==========================================================
@@ -1147,57 +1069,46 @@ function updateDistributionDates() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  document
-    .querySelectorAll(".talents__joueur-talent-prochaine-date")
-    .forEach((element) => {
-      const date = parseDate(element.textContent.trim());
+  document.querySelectorAll(".talents__joueur-talent-prochaine-date").forEach((element) => {
+    const date = parseDate(element.textContent.trim());
 
-      if (!date) return;
+    if (!date) return;
 
-      date.setHours(0, 0, 0, 0);
+    date.setHours(0, 0, 0, 0);
 
-      const difference = Math.round(
-        (date - today) / 86400000,
-      );
+    const difference = Math.round((date - today) / 86400000);
 
-      let status = "";
+    let status = "";
 
-      if (difference === 0) {
-        status = "today";
-      } else if (difference === -3) {
-        status = "3daysBefore";
-      } else if (difference === -1) {
-        status = "yesterday";
-      } else if (difference === 3) {
-        status = "3daysAfter";
-      }
+    if (difference === 0) {
+      status = "today";
+    } else if (difference === -3) {
+      status = "3daysBefore";
+    } else if (difference === -1) {
+      status = "yesterday";
+    } else if (difference === 3) {
+      status = "3daysAfter";
+    }
 
-      if (status) {
-        element.dataset.date = status;
-      } else {
-        delete element.dataset.date;
-      }
-    });
+    if (status) {
+      element.dataset.date = status;
+    } else {
+      delete element.dataset.date;
+    }
+  });
 }
 
 // ==========================================================
 // SYNCHRONISATION GOOGLE SHEETS
 // ==========================================================
 
-const GOOGLE_SHEETS_API_URL =
-  "https://script.google.com/macros/s/AKfycby7sfWJyZ_2PMn1gm8MuaHk594uk6_dEUxTEEEV6j5Bo3lp2rgoBhcHPzbMmWSuGjtoGw/exec";
+const GOOGLE_SHEETS_API_URL = "https://script.google.com/macros/s/AKfycby7sfWJyZ_2PMn1gm8MuaHk594uk6_dEUxTEEEV6j5Bo3lp2rgoBhcHPzbMmWSuGjtoGw/exec";
 
-const synchroniserButton = document.querySelector(
-  "#synchroniser-sheets",
-);
+const synchroniserButton = document.querySelector("#synchroniser-sheets");
 
-const synchroniserMessage = document.querySelector(
-  "#synchroniser-message",
-);
+const synchroniserMessage = document.querySelector("#synchroniser-message");
 
-const synchroniserFrame = document.querySelector(
-  "#synchroniser-frame",
-);
+const synchroniserFrame = document.querySelector("#synchroniser-frame");
 
 let synchronisationEnCours = null;
 
@@ -1223,22 +1134,18 @@ document.body.appendChild(synchroniserForm);
 if (synchroniserButton) {
   synchroniserButton.addEventListener("click", () => {
     if (modificationsEnAttente.size === 0) {
-      synchroniserMessage.textContent =
-        "Aucune modification à synchroniser.";
+      synchroniserMessage.textContent = "Aucune modification à synchroniser.";
 
       return;
     }
 
     synchroniserButton.disabled = true;
 
-    synchroniserMessage.textContent =
-      "Synchronisation en cours...";
+    synchroniserMessage.textContent = "Synchronisation en cours...";
 
     const payload = {
       requestId: String(Date.now()),
-      modifications: Array.from(
-        modificationsEnAttente.values(),
-      ),
+      modifications: Array.from(modificationsEnAttente.values()),
     };
 
     synchronisationEnCours = payload.requestId;
@@ -1265,10 +1172,7 @@ window.addEventListener("message", (event) => {
 
   // = Vérification de la requête.
 
-  if (
-    response.requestId &&
-    response.requestId !== synchronisationEnCours
-  ) {
+  if (response.requestId && response.requestId !== synchronisationEnCours) {
     return;
   }
 
@@ -1281,13 +1185,11 @@ window.addEventListener("message", (event) => {
 
     actualiserCompteur();
 
-    synchroniserMessage.textContent =
-      "Synchronisation terminée !";
+    synchroniserMessage.textContent = "Synchronisation terminée !";
 
     synchroniserMessage.dataset.status = "success";
   } else {
-    synchroniserMessage.textContent =
-      `Erreur : ${response.message || "Synchronisation impossible."}`;
+    synchroniserMessage.textContent = `Erreur : ${response.message || "Synchronisation impossible."}`;
 
     synchroniserMessage.dataset.status = "error";
   }
@@ -1302,17 +1204,13 @@ window.addEventListener("message", (event) => {
 // ==========================================================
 
 talentsJoueurs.addEventListener("click", (event) => {
-  const button = event.target.closest(
-    ".talents__joueur-toggle",
-  );
+  const button = event.target.closest(".talents__joueur-toggle");
 
   if (!button || !talentsJoueurs.contains(button)) return;
 
   const card = button.closest(".talents__joueur");
 
-  const details = card.querySelector(
-    ".talents__joueur-details",
-  );
+  const details = card.querySelector(".talents__joueur-details");
 
   if (!card || !details) return;
 
@@ -1368,17 +1266,10 @@ async function initDropdownJoueurs(members) {
     // = Filtrage des joueurs.
 
     onChange: (selectedIds) => {
-      const cards = talentsJoueurs.querySelectorAll(
-        ".talents__joueur",
-      );
+      const cards = talentsJoueurs.querySelectorAll(".talents__joueur");
 
       cards.forEach((card) => {
-        const isVisible =
-          selectedIds.length === 0 ||
-          selectedIds.some(
-            (id) =>
-              String(id) === String(card.dataset.joueurId),
-          );
+        const isVisible = selectedIds.length === 0 || selectedIds.some((id) => String(id) === String(card.dataset.joueurId));
 
         card.hidden = !isVisible;
       });
@@ -1412,22 +1303,23 @@ async function initDropdownObjets(objetsData) {
       type: "teracristal",
       placeholder: "Choisir un objet Téracristal",
     },
+    {
+      categorie: "ct",
+      type: "ct",
+      placeholder: "Choisir une CT",
+    },
   ];
 
   await Promise.all(
     dropdownConfigs.map(async ({ categorie, type, placeholder }) => {
-      const objets = Array.isArray(objetsData?.[categorie])
-  ? objetsData[categorie]
-  : [];
+      const objets = Array.isArray(objetsData?.[categorie]) ? objetsData[categorie] : [];
 
-console.log(`[Dropdown ${categorie}]`, {
-  objets,
-  nombre: objets.length,
-});
+      console.log(`[Dropdown ${categorie}]`, {
+        objets,
+        nombre: objets.length,
+      });
 
-      const dropdowns = document.querySelectorAll(
-        `[data-dropdown="${type}"]`,
-      );
+      const dropdowns = document.querySelectorAll(`[data-dropdown="${type}"]`);
 
       await Promise.all(
         [...dropdowns].map(async (dropdown) => {
@@ -1510,21 +1402,15 @@ async function initDropdownTalents(members) {
 
   await Promise.all(
     dropdownConfigs.map(async ({ type, placeholder }) => {
-      const dropdowns = document.querySelectorAll(
-        `[data-dropdown="${type}"]`,
-      );
+      const dropdowns = document.querySelectorAll(`[data-dropdown="${type}"]`);
 
       await Promise.all(
         [...dropdowns].map(async (dropdown) => {
-          const joueurId = dropdown.closest(
-            ".talents__joueur",
-          )?.dataset.joueurId;
+          const joueurId = dropdown.closest(".talents__joueur")?.dataset.joueurId;
 
           // = Exclure le joueur lui-même.
 
-          const options = members.filter(
-            (member) => String(member.id) !== String(joueurId),
-          );
+          const options = members.filter((member) => String(member.id) !== String(joueurId));
 
           await Dropdown.create({
             container: `#${dropdown.id}`,
@@ -1593,39 +1479,19 @@ async function initDropdownTalents(members) {
 
 async function initTalents() {
   try {
-    const [
-      talentsData,
-      membersData,
-      objets,
-      distributionsData,
-    ] = await Promise.all([
-      fetchJson(TALENTS_URL),
-      fetchJson(MEMBERLIST_URL),
-      fetchJson(OBJETS_URL),
-      fetchJson(DISTRIBUTION_URL),
-    ]);
+    const [talentsData, membersData, objets, distributionsData] = await Promise.all([fetchJson(TALENTS_URL), fetchJson(MEMBERLIST_URL), fetchJson(OBJETS_URL), fetchJson(DISTRIBUTION_URL)]);
 
-    const talents = Array.isArray(talentsData)
-      ? talentsData
-      : talentsData.talents;
+    const talents = Array.isArray(talentsData) ? talentsData : talentsData.talents;
 
-    const members = Array.isArray(membersData)
-      ? membersData
-      : membersData.members;
+    const members = Array.isArray(membersData) ? membersData : membersData.members;
 
-    const distributions = Array.isArray(distributionsData)
-      ? distributionsData
-      : [];
+    const distributions = Array.isArray(distributionsData) ? distributionsData : [];
 
     objetsData = objets;
 
     renderTalents(talents);
 
-   await renderTalentsJoueurs(
-      members,
-      talents,
-      distributions,
-    );
+    await renderTalentsJoueurs(members, talents, distributions);
 
     await initDropdownJoueurs(members);
   } catch (error) {
