@@ -581,6 +581,15 @@ function renderTalentsJoueurs(members, talents, distributions) {
                     const isJoaillier =
                       talentKey === normalizeName("Joaillier");
 
+                    const isPasseurDeSavoir =
+  talentKey === normalizeName("Passeur de savoir");
+
+const isMentor =
+  talentKey === normalizeName("Mentor");
+
+const isTransmission =
+  talentKey === normalizeName("Transmission");
+
                     return `
                       <li
                         class="talents__joueur-talent"
@@ -684,6 +693,39 @@ function renderTalentsJoueurs(members, talents, distributions) {
                               `
                               : ""
                           }
+
+                          ${
+  isPasseurDeSavoir
+    ? `
+      <div
+        id="dropdown-passeur-${escapeHtml(player.id)}"
+        data-dropdown="passeur"
+      ></div>
+    `
+    : ""
+}
+
+${
+  isMentor
+    ? `
+      <div
+        id="dropdown-mentor-${escapeHtml(player.id)}"
+        data-dropdown="mentor"
+      ></div>
+    `
+    : ""
+}
+
+${
+  isTransmission
+    ? `
+      <div
+        id="dropdown-transmission-${escapeHtml(player.id)}"
+        data-dropdown="transmission"
+      ></div>
+    `
+    : ""
+}
 
                         </div>
 
@@ -1317,6 +1359,105 @@ async function initDropdownCristalZ(objetsData) {
           return wrapper;
         },
       });
+    }),
+  );
+}
+
+// ==========================================================
+// DROPDOWNS DES JOUEURS
+// ==========================================================
+
+async function initDropdownTalents(members) {
+  const dropdownConfigs = [
+    {
+      type: "passeur",
+      placeholder: "Choisir un joueur à qui prêter le talent",
+    },
+    {
+      type: "mentor",
+      placeholder: "Choisir un joueur à qui offrir une montée de rang",
+    },
+    {
+      type: "transmission",
+      placeholder: "Choisir un joueur bénéficiaire",
+    },
+  ];
+
+  await Promise.all(
+    dropdownConfigs.map(async ({ type, placeholder }) => {
+      const dropdowns = document.querySelectorAll(
+        `[data-dropdown="${type}"]`,
+      );
+
+      await Promise.all(
+        [...dropdowns].map(async (dropdown) => {
+          const joueurId = dropdown.closest(
+            ".talents__joueur",
+          )?.dataset.joueurId;
+
+          // = Exclure le joueur lui-même.
+
+          const options = members.filter(
+            (member) => String(member.id) !== String(joueurId),
+          );
+
+          await Dropdown.create({
+            container: `#${dropdown.id}`,
+
+            options,
+
+            type: "filter",
+            mode: "single",
+
+            valueKey: "id",
+            labelKey: "pseudo",
+            searchKeys: ["pseudo"],
+
+            placeholder,
+            searchPlaceholder: "Rechercher un joueur...",
+
+            // = Affichage des options.
+
+            renderOption: (member) => {
+              const wrapper = document.createElement("div");
+              wrapper.className = "dropdown__member";
+
+              const avatar = document.createElement("img");
+              avatar.className = "dropdown__avatar";
+              avatar.src = member.avatar || "";
+              avatar.alt = "";
+              avatar.loading = "lazy";
+
+              const pseudo = document.createElement("span");
+              pseudo.textContent = member.pseudo;
+
+              wrapper.append(avatar, pseudo);
+
+              return wrapper;
+            },
+
+            // = Affichage de la valeur sélectionnée.
+
+            renderValue: (member) => {
+              const wrapper = document.createElement("div");
+              wrapper.className = "dropdown__member";
+
+              const avatar = document.createElement("img");
+              avatar.className = "dropdown__avatar";
+              avatar.src = member.avatar || "";
+              avatar.alt = "";
+              avatar.loading = "lazy";
+
+              const pseudo = document.createElement("span");
+              pseudo.textContent = member.pseudo;
+
+              wrapper.append(avatar, pseudo);
+
+              return wrapper;
+            },
+          });
+        }),
+      );
     }),
   );
 }
