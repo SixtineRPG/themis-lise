@@ -1644,7 +1644,7 @@ async function testInventoryPreview() {
     // = Prévisualisation
 
     const result = await ForumAPI.previewInventory(
-      123, // ID d'un joueur de test
+      6, // ID d'un joueur de test
       {
         "Poké Ball": 4,
         "Pierre Soleil": 1
