@@ -718,7 +718,7 @@ function renderTalentsJoueurs(members, talents, distributions) {
                             </strong>
                           </div>
 
-                          ${category ? `<span data-button="reward"></span>` : ""}
+                          <span data-button="reward"></span>
 
                         </div>
 
@@ -892,7 +892,13 @@ function renderTalentsJoueurs(members, talents, distributions) {
             ".talents__joueur",
           );
 
-          const objetName = talentElement.dataset.generatedItem;
+const dropdownItem = talentElement.querySelector(
+  ".dropdown__trigger .dropdown__member span"
+);
+
+const objetName =
+  talentElement.dataset.generatedItem ||
+  dropdownItem?.textContent.trim();
 
           if (!objetName) {
             return false;
