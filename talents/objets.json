@@ -2646,5 +2646,37 @@
       "prix": "",
       "boutique": "indisponible"
     }
+  ],
+  "dynamax": [
+    {
+      "nom": "Normalomax",
+      "description": "Permet la Méga-Évolution du Pokémon correspondant.",
+      "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/venusaurite.png",
+      "prix": "",
+      "boutique": "indisponible"
+    },
+    {
+      "nom": "Gardomax",
+      "description": "Permet la Méga-Évolution du Pokémon correspondant.",
+      "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/charizardite-x.png",
+      "prix": "",
+      "boutique": "indisponible"
+    }
+  ],
+  "teracristal": [
+    {
+      "nom": "Diamants sertis",
+      "description": "Permet la Méga-Évolution du Pokémon correspondant.",
+      "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/venusaurite.png",
+      "prix": "",
+      "boutique": "indisponible"
+    },
+    {
+      "nom": "Fleurs",
+      "description": "Permet la Méga-Évolution du Pokémon correspondant.",
+      "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/charizardite-x.png",
+      "prix": "",
+      "boutique": "indisponible"
+    }
   ]
 }
