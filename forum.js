@@ -112,5 +112,9 @@ export const ForumAPI = {
 
   ping() {
     return request("relay.ping");
+  },
+
+  checkAuth() {
+    return request("auth.check");
   }
 };
