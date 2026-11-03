@@ -1639,3 +1639,22 @@ testButton.textContent = "Tester le relais Themis";
 testButton.addEventListener("click", testRelay);
 
 document.body.appendChild(testButton);
+
+// = TEST PREVISUALISATION INVENTAIRE
+
+async function testInventoryPreview() {
+  try {
+    const result = await ForumAPI.previewInventory(
+      123, // ID d'un joueur de test
+      {
+        "Poké Ball": 4,
+        "Pierre Soleil": 1
+      }
+    );
+
+    console.log("[TEST INVENTAIRE] Résultat :", result);
+
+  } catch (error) {
+    console.error("[TEST INVENTAIRE] Erreur :", error);
+  }
+}
