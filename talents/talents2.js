@@ -1603,6 +1603,7 @@ async function initTalents() {
 
 initTalents();
 
+
 // ==========================================================
 // TEST — RELAIS FORUMACTIF
 // ==========================================================
@@ -1611,14 +1612,25 @@ async function testRelay() {
   try {
     await ForumAPI.connect();
 
-    const response = await ForumAPI.ping();
+    // = Test de connexion
 
-    console.log("[TEST] Réponse du relais :", response);
+    const ping = await ForumAPI.ping();
+
+    console.log("[TEST] Connexion au relais :", ping);
+
+    // = Test d'authentification
+
+    const auth = await ForumAPI.checkAuth();
+
+    console.log("[TEST AUTH] Résultat :", auth);
+    console.log("[TEST AUTH] Administrateur :", auth.data);
 
   } catch (error) {
     console.error("[TEST] Échec :", error);
   }
 }
+
+// = Bouton de test
 
 const testButton = document.createElement("button");
 
