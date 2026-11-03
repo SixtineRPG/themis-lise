@@ -424,7 +424,7 @@ function renderTalents(talents) {
 // Sources : LOCAL
 // ==========================================================
 
-function renderTalentsJoueurs(members, talents, distributions) {
+await function renderTalentsJoueurs(members, talents, distributions) {
   const selectedTalents = getTargetTalents(talents);
 
   const talentsByName = new Map(
@@ -545,10 +545,10 @@ function renderTalentsJoueurs(members, talents, distributions) {
                       normalizeName(talent.nom),
                     );
 
-                    const talentName = talent.nom;
-                    const talentKey = normalizeName(talentName);
+const talentName = talent.nom;
+const talentKey = normalizeName(talentName);
 
-  const hideLastItem = [
+const hideLastItem = [
   normalizeName("Prévoyant"),
   normalizeName("Chef"),
 ].includes(talentKey);
@@ -588,6 +588,12 @@ function renderTalentsJoueurs(members, talents, distributions) {
 
                     const isJoaillier =
                       talentKey === normalizeName("Joaillier");
+
+                    const isPousseurDeFonte =
+  talentKey === normalizeName("Pousseur de fonte");
+
+const isPrincesse =
+  talentKey === normalizeName("Princesse");
 
                     const isPasseurDeSavoir =
   talentKey === normalizeName("Passeur de savoir");
@@ -707,6 +713,28 @@ const isTransmission =
                               `
                               : ""
                           }
+
+                          ${
+  isPousseurDeFonte
+    ? `
+      <div
+        id="dropdown-dynamax-${escapeHtml(player.id)}"
+        data-dropdown="dynamax"
+      ></div>
+    `
+    : ""
+}
+
+${
+  isPrincesse
+    ? `
+      <div
+        id="dropdown-teracristal-${escapeHtml(player.id)}"
+        data-dropdown="teracristal"
+      ></div>
+    `
+    : ""
+}
 
                           ${
   isPasseurDeSavoir
@@ -955,9 +983,12 @@ talentsJoueurs
 
         // = Récupération de l'objet généré ou sélectionné.
 
-        const dropdownItem = talentElement.querySelector(
-          ".dropdown__trigger .dropdown__member span",
-        );
+const dropdownItem = talentElement.querySelector(
+  '[data-dropdown="cristal-z"] .dropdown__trigger .dropdown__member span, ' +
+  '[data-dropdown="mega-gemmes"] .dropdown__trigger .dropdown__member span, ' +
+  '[data-dropdown="dynamax"] .dropdown__trigger .dropdown__member span, ' +
+  '[data-dropdown="teracristal"] .dropdown__trigger .dropdown__member span',
+);
 
         const objetName =
           talentElement.dataset.generatedItem ||
@@ -1016,9 +1047,8 @@ talentsJoueurs
   // INITIALISATION DES DROPDOWNS
   // ========================================================
 
-  initDropdownCristalZ(objetsData);
-  initDropdownMegaGemmes(objetsData);
-  initDropdownTalents(members);
+await initDropdownObjets(objetsData);
+await initDropdownTalents(members);
 }
 
 // ==========================================================
@@ -1269,137 +1299,96 @@ async function initDropdownJoueurs(members) {
 }
 
 // ==========================================================
-// FILTRE DES MÉGA-GEMMES
+// FILTRES DES OBJETS
 // ==========================================================
 
-async function initDropdownMegaGemmes(objetsData) {
-  const megaGemmes = objetsData["mega-gemmes"] || [];
-
-  const dropdowns = document.querySelectorAll(
-    '[data-dropdown="mega-gemmes"]',
-  );
+async function initDropdownObjets(objetsData) {
+  const dropdownConfigs = [
+    {
+      categorie: "cristal-z",
+      type: "cristal-z",
+      placeholder: "Choisir un Cristal Z",
+    },
+    {
+      categorie: "mega-gemmes",
+      type: "mega-gemmes",
+      placeholder: "Choisir une Méga-Gemme",
+    },
+    {
+      categorie: "dynamax",
+      type: "dynamax",
+      placeholder: "Choisir un objet Dynamax",
+    },
+    {
+      categorie: "teracristal",
+      type: "teracristal",
+      placeholder: "Choisir un objet Téracristal",
+    },
+  ];
 
   await Promise.all(
-    [...dropdowns].map(async (dropdown) => {
-      await Dropdown.create({
-        container: `#${dropdown.id}`,
+    dropdownConfigs.map(async ({ categorie, type, placeholder }) => {
+      const objets = objetsData[categorie] || [];
 
-        options: megaGemmes,
+      const dropdowns = document.querySelectorAll(
+        `[data-dropdown="${type}"]`,
+      );
 
-        type: "filter",
-        mode: "single",
+      await Promise.all(
+        [...dropdowns].map(async (dropdown) => {
+          await Dropdown.create({
+            container: `#${dropdown.id}`,
 
-        valueKey: "nom",
-        labelKey: "nom",
-        searchKeys: ["nom"],
+            options: objets,
 
-        placeholder: "Choisir une Méga-Gemme",
-        searchPlaceholder: "Rechercher une Méga-Gemme...",
+            type: "filter",
+            mode: "single",
 
-        renderOption: (objet) => {
-          const wrapper = document.createElement("div");
-          wrapper.className = "dropdown__member";
+            valueKey: "nom",
+            labelKey: "nom",
+            searchKeys: ["nom"],
 
-          const image = document.createElement("img");
-          image.className = "dropdown__avatar";
-          image.src = objet.image || "";
-          image.alt = "";
-          image.loading = "lazy";
+            placeholder,
+            searchPlaceholder: `Rechercher ${placeholder.toLowerCase()}...`,
 
-          const nom = document.createElement("span");
-          nom.textContent = objet.nom;
+            renderOption: (objet) => {
+              const wrapper = document.createElement("div");
+              wrapper.className = "dropdown__member";
 
-          wrapper.append(image, nom);
+              const image = document.createElement("img");
+              image.className = "dropdown__avatar";
+              image.src = objet.image || "";
+              image.alt = "";
+              image.loading = "lazy";
 
-          return wrapper;
-        },
+              const nom = document.createElement("span");
+              nom.textContent = objet.nom;
 
-        renderValue: (objet) => {
-          const wrapper = document.createElement("div");
-          wrapper.className = "dropdown__member";
+              wrapper.append(image, nom);
 
-          const image = document.createElement("img");
-          image.className = "dropdown__avatar";
-          image.src = objet.image || "";
-          image.alt = "";
-          image.loading = "lazy";
+              return wrapper;
+            },
 
-          const nom = document.createElement("span");
-          nom.textContent = objet.nom;
+            renderValue: (objet) => {
+              const wrapper = document.createElement("div");
+              wrapper.className = "dropdown__member";
 
-          wrapper.append(image, nom);
+              const image = document.createElement("img");
+              image.className = "dropdown__avatar";
+              image.src = objet.image || "";
+              image.alt = "";
+              image.loading = "lazy";
 
-          return wrapper;
-        },
-      });
-    }),
-  );
-}
+              const nom = document.createElement("span");
+              nom.textContent = objet.nom;
 
-// ==========================================================
-// FILTRE DES CRISTAUX Z
-// ==========================================================
+              wrapper.append(image, nom);
 
-async function initDropdownCristalZ(objetsData) {
-  const cristauxZ = objetsData["cristal-z"] || [];
-
-  const dropdowns = document.querySelectorAll(
-    '[data-dropdown="cristal-z"]',
-  );
-
-  await Promise.all(
-    [...dropdowns].map(async (dropdown) => {
-      await Dropdown.create({
-        container: `#${dropdown.id}`,
-
-        options: cristauxZ,
-
-        type: "filter",
-        mode: "single",
-
-        valueKey: "nom",
-        labelKey: "nom",
-        searchKeys: ["nom"],
-
-        placeholder: "Choisir un Cristal Z",
-        searchPlaceholder: "Rechercher un Cristal Z...",
-
-        renderOption: (objet) => {
-          const wrapper = document.createElement("div");
-          wrapper.className = "dropdown__member";
-
-          const image = document.createElement("img");
-          image.className = "dropdown__avatar";
-          image.src = objet.image || "";
-          image.alt = "";
-          image.loading = "lazy";
-
-          const nom = document.createElement("span");
-          nom.textContent = objet.nom;
-
-          wrapper.append(image, nom);
-
-          return wrapper;
-        },
-
-        renderValue: (objet) => {
-          const wrapper = document.createElement("div");
-          wrapper.className = "dropdown__member";
-
-          const image = document.createElement("img");
-          image.className = "dropdown__avatar";
-          image.src = objet.image || "";
-          image.alt = "";
-          image.loading = "lazy";
-
-          const nom = document.createElement("span");
-          nom.textContent = objet.nom;
-
-          wrapper.append(image, nom);
-
-          return wrapper;
-        },
-      });
+              return wrapper;
+            },
+          });
+        }),
+      );
     }),
   );
 }
@@ -1537,7 +1526,7 @@ async function initTalents() {
 
     renderTalents(talents);
 
-    renderTalentsJoueurs(
+   await renderTalentsJoueurs(
       members,
       talents,
       distributions,
