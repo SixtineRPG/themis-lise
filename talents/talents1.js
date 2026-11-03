@@ -604,6 +604,15 @@ const isMentor =
 const isTransmission =
   talentKey === normalizeName("Transmission");
 
+                    const isAimantRaretes =
+  talentKey === normalizeName("Aimant à raretés");
+
+const isCTDouteuse =
+  talentKey === normalizeName("CT Douteuse");
+
+const isDonneurCapacites =
+  talentKey === normalizeName("Donneur de capacités");
+
                     return `
                       <li
                         class="talents__joueur-talent"
@@ -1073,6 +1082,22 @@ const valeur = inputValeur
     ? joueurSelectionne
     : objetName;
 
+// = Vérification du format de l'URL.
+
+if (inputValeur?.type === "url") {
+  try {
+    const url = new URL(valeur);
+
+    if (!["http:", "https:"].includes(url.protocol)) {
+      inputValeur.reportValidity();
+      return false;
+    }
+  } catch {
+    inputValeur.reportValidity();
+    return false;
+  }
+}
+
 // = Vérification de la saisie ou de la sélection.
 
 if (hasRewardSelection && !valeur) {
@@ -1080,12 +1105,6 @@ if (hasRewardSelection && !valeur) {
     inputValeur.reportValidity();
   }
 
-  return false;
-}
-
-// = Vérification uniquement si une sélection est attendue.
-
-if (hasRewardSelection && !valeur) {
   return false;
 }
 
