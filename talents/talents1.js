@@ -769,6 +769,34 @@ ${
     : ""
 }
 
+${
+  isAimantRaretes
+    ? `
+      <input
+        class="talents__joueur-talent-input"
+        type="url"
+        placeholder="URL"
+        aria-label="URL de la capture"
+        required
+      >
+    `
+    : ""
+}
+
+${
+  isCTDouteuse || isDonneurCapacites
+    ? `
+      <input
+        class="talents__joueur-talent-input"
+        type="text"
+        placeholder="Saisir une valeur"
+        aria-label="Valeur de la récompense"
+        required
+      >
+    `
+    : ""
+}
+
                         </div>
 
                         <!-- Distribution du talent -->
@@ -1002,6 +1030,12 @@ const dropdownItem = talentElement.querySelector(
           '[data-dropdown="transmission"] .dropdown__trigger .dropdown__member span',
         )?.textContent.trim();
 
+        const inputValeur = talentElement.querySelector(
+  ".talents__joueur-talent-input",
+);
+
+const valeurInput = inputValeur?.value.trim();
+
         const talentsJoueursCibles = [
           normalizeName("Passeur de savoir"),
           normalizeName("Mentor"),
@@ -1030,11 +1064,24 @@ const hasInput = talentElement.querySelector(
   "input:not([type='date']), select, textarea",
 );
 
-const hasRewardSelection = hasDropdown || hasGenerator || hasInput;
+const hasRewardSelection =
+  hasDropdown || hasGenerator || hasInput;
 
-const valeur = isTalentJoueur
-  ? joueurSelectionne
-  : objetName;
+const valeur = inputValeur
+  ? valeurInput
+  : isTalentJoueur
+    ? joueurSelectionne
+    : objetName;
+
+// = Vérification de la saisie ou de la sélection.
+
+if (hasRewardSelection && !valeur) {
+  if (inputValeur) {
+    inputValeur.reportValidity();
+  }
+
+  return false;
+}
 
 // = Vérification uniquement si une sélection est attendue.
 
