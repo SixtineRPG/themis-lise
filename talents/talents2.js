@@ -1048,17 +1048,26 @@ function initDateButtons() {
       successText: "Date enregistrée !",
       errorText: "Date invalide !",
 
-      onClick: () => {
-        const talentElement = placeholder.closest(".talents__joueur-talent");
+onClick: () => {
+  const talentElement = placeholder.closest(".talents__joueur-talent");
+  const playerElement = placeholder.closest(".talents__joueur");
 
-        const playerElement = placeholder.closest(".talents__joueur");
+  if (!talentElement || !playerElement) {
+    console.error("[Talents] Impossible de retrouver le joueur ou le talent.", placeholder);
+    return false;
+  }
 
-        const input = talentElement.querySelector("input[type='date']");
+  const input = talentElement.querySelector("input[type='date']");
 
-        if (!input.value) {
-          input.reportValidity();
-          return false;
-        }
+  if (!input) {
+    console.error("[Talents] Champ de date introuvable.", talentElement);
+    return false;
+  }
+
+  if (!input.value) {
+    input.reportValidity();
+    return false;
+  }
 
         const joueurId = playerElement.dataset.joueurId;
         const talentName = talentElement.dataset.talent;
@@ -1103,16 +1112,19 @@ function initRewardButtons() {
       errorText: "Sélectionner une récompense d'abord",
       errorDuration: 1000,
 
-      onClick: () => {
-        const talentElement = placeholder.closest(".talents__joueur-talent");
+onClick: () => {
+  const talentElement = placeholder.closest(".talents__joueur-talent");
+  const playerElement = placeholder.closest(".talents__joueur");
 
-        const playerElement = placeholder.closest(".talents__joueur");
+  if (!talentElement || !playerElement) {
+    console.error("[Talents] Impossible de retrouver le joueur ou le talent.", placeholder);
+    return false;
+  }
 
-        const talentName = talentElement.dataset.talent;
-        const talentKey = normalizeName(talentName);
+  const talentName = talentElement.dataset.talent;
+  const talentKey = normalizeName(talentName);
 
-        const joueurId = playerElement.dataset.joueurId;
-
+  const joueurId = playerElement.dataset.joueurId;
         const objetName = getSelectedObject(talentElement);
 
         const joueurSelectionne = getSelectedPlayer(talentElement);
@@ -1606,13 +1618,10 @@ async function testRelay() {
   }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  const button = document.createElement("button");
+const testButton = document.createElement("button");
 
-  button.type = "button";
-  button.textContent = "Tester le relais Themis";
+testButton.type = "button";
+testButton.textContent = "Tester le relais Themis";
+testButton.addEventListener("click", testRelay);
 
-  button.addEventListener("click", testRelay);
-
-  document.body.appendChild(button);
-});
+document.body.appendChild(testButton);
