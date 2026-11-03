@@ -5,7 +5,7 @@ import { Dropdown } from "https://sixtinerpg.github.io/themis-lise/components/dr
 const TALENTS_URL = "https://sixtinerpg.github.io/themis-lise/talents/talents.json";
 //const MEMBERLIST_URL = "../../shared/memberlist_json.php";
 const MEMBERLIST_URL = "https://sixtinerpg.github.io/themis-lise/talents/memberlist_local.json";
-const OBJETS_URL = "https://sixtinerpg.github.io/themis-lise/talents/objets.json";
+const OBJETS_URL = "https://sixtinerpg.github.io/themis-lise/talents/objets.json?v=2";
 //const OBJETS_URL = "../../shared/data/objets.json";
 const DISTRIBUTION_URL = "https://opensheet.elk.sh/1sRWoDg-4tnX_oiE_v0PK_D7ZGnxLk6OAeJY91PVFkoU/Distributions";
 
@@ -1012,13 +1012,35 @@ const dropdownItem = talentElement.querySelector(
           talentKey,
         );
 
-        const valeur = isTalentJoueur
-          ? joueurSelectionne
-          : objetName;
+const hasDropdown = talentElement.querySelector(
+  '[data-dropdown="cristal-z"], ' +
+  '[data-dropdown="mega-gemmes"], ' +
+  '[data-dropdown="dynamax"], ' +
+  '[data-dropdown="teracristal"], ' +
+  '[data-dropdown="passeur"], ' +
+  '[data-dropdown="mentor"], ' +
+  '[data-dropdown="transmission"]',
+);
 
-        if (!valeur) {
-          return false;
-        }
+const hasGenerator = talentElement.querySelector(
+  '[data-button="generate"], .talents__objet-result',
+);
+
+const hasInput = talentElement.querySelector(
+  "input:not([type='date']), select, textarea",
+);
+
+const hasRewardSelection = hasDropdown || hasGenerator || hasInput;
+
+const valeur = isTalentJoueur
+  ? joueurSelectionne
+  : objetName;
+
+// = Vérification uniquement si une sélection est attendue.
+
+if (hasRewardSelection && !valeur) {
+  return false;
+}
 
         // = Enregistrement de la modification.
 
@@ -1028,7 +1050,7 @@ const dropdownItem = talentElement.querySelector(
             joueur_id: joueurId,
             talent: talentName,
             type: isTalentJoueur ? "joueur" : "item",
-            dernier_item: valeur,
+            dernier_item: valeur || "",
           },
         );
       },
@@ -1328,7 +1350,14 @@ async function initDropdownObjets(objetsData) {
 
   await Promise.all(
     dropdownConfigs.map(async ({ categorie, type, placeholder }) => {
-      const objets = objetsData[categorie] || [];
+      const objets = Array.isArray(objetsData?.[categorie])
+  ? objetsData[categorie]
+  : [];
+
+console.log(`[Dropdown ${categorie}]`, {
+  objets,
+  nombre: objets.length,
+});
 
       const dropdowns = document.querySelectorAll(
         `[data-dropdown="${type}"]`,
