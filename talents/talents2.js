@@ -1037,9 +1037,13 @@ function initGenerateButtons() {
 }
 
 // = Initialiser les boutons de dates.
-
 function initDateButtons() {
   talentsJoueurs.querySelectorAll('[data-button="date-submit"]').forEach((placeholder) => {
+
+    // > On récupère les parents avant le remplacement du placeholder.
+    const talentElement = placeholder.closest(".talents__joueur-talent");
+    const playerElement = placeholder.closest(".talents__joueur");
+
     createButton(placeholder, {
       text: "Valider la date",
       variant: "inset",
@@ -1048,26 +1052,18 @@ function initDateButtons() {
       successText: "Date enregistrée !",
       errorText: "Date invalide !",
 
-onClick: () => {
-  const talentElement = placeholder.closest(".talents__joueur-talent");
-  const playerElement = placeholder.closest(".talents__joueur");
+      onClick: () => {
+        if (!talentElement || !playerElement) {
+          console.error("[Talents] Joueur ou talent introuvable.");
+          return false;
+        }
 
-  if (!talentElement || !playerElement) {
-    console.error("[Talents] Impossible de retrouver le joueur ou le talent.", placeholder);
-    return false;
-  }
+        const input = talentElement.querySelector("input[type='date']");
 
-  const input = talentElement.querySelector("input[type='date']");
-
-  if (!input) {
-    console.error("[Talents] Champ de date introuvable.", talentElement);
-    return false;
-  }
-
-  if (!input.value) {
-    input.reportValidity();
-    return false;
-  }
+        if (!input || !input.value) {
+          input?.reportValidity();
+          return false;
+        }
 
         const joueurId = playerElement.dataset.joueurId;
         const talentName = talentElement.dataset.talent;
@@ -1089,7 +1085,6 @@ onClick: () => {
         });
 
         talentElement.dataset.statut = getRewardStatus(input.value, delai);
-
         talentElement.dataset.dateRecompense = input.value;
 
         appliquerFiltresJoueurs();
@@ -1103,6 +1098,11 @@ onClick: () => {
 
 function initRewardButtons() {
   talentsJoueurs.querySelectorAll('[data-button="reward"]').forEach((placeholder) => {
+
+    // > On récupère les parents avant le remplacement du placeholder.
+    const talentElement = placeholder.closest(".talents__joueur-talent");
+    const playerElement = placeholder.closest(".talents__joueur");
+
     createButton(placeholder, {
       text: "Valider la récompense",
       variant: "inset",
@@ -1113,8 +1113,10 @@ function initRewardButtons() {
       errorDuration: 1000,
 
 onClick: () => {
-  const talentElement = placeholder.closest(".talents__joueur-talent");
-  const playerElement = placeholder.closest(".talents__joueur");
+if (!talentElement || !playerElement) {
+  console.error("[Talents] Joueur ou talent introuvable.");
+  return false;
+}
 
   if (!talentElement || !playerElement) {
     console.error("[Talents] Impossible de retrouver le joueur ou le talent.", placeholder);
