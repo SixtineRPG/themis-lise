@@ -1,7 +1,7 @@
 import { Button } from "https://sixtinerpg.github.io/themis-lise/components/buttons/buttons.js";
 import { DateFilter } from "https://sixtinerpg.github.io/themis-lise/components/data-filter/data-filter.js";
 import { Dropdown } from "../../shared/components/dropdown/dropdown.js";
-
+import { ForumAPI } from "https://sixtinerpg.github.io/themis-lise/forum.js";
 // ==========================================================
 // CONFIGURATION
 // ==========================================================
@@ -1588,3 +1588,31 @@ async function initTalents() {
 }
 
 initTalents();
+
+// ==========================================================
+// TEST — RELAIS FORUMACTIF
+// ==========================================================
+
+async function testRelay() {
+  try {
+    await ForumAPI.connect();
+
+    const response = await ForumAPI.ping();
+
+    console.log("[TEST] Réponse du relais :", response);
+
+  } catch (error) {
+    console.error("[TEST] Échec :", error);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const button = document.createElement("button");
+
+  button.type = "button";
+  button.textContent = "Tester le relais Themis";
+
+  button.addEventListener("click", testRelay);
+
+  document.body.appendChild(button);
+});
