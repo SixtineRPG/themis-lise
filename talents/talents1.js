@@ -434,10 +434,7 @@ function renderTalentsJoueurs(members, talents, distributions) {
     ]),
   );
 
-  const hideLastItem = [
-  normalizeName("Prévoyant"),
-  normalizeName("Chef"),
-].includes(talentKey);
+
 
   // = Index des dernières distributions.
 
@@ -550,6 +547,12 @@ function renderTalentsJoueurs(members, talents, distributions) {
 
                     const talentName = talent.nom;
                     const talentKey = normalizeName(talentName);
+
+  const hideLastItem = [
+  normalizeName("Prévoyant"),
+  normalizeName("Chef"),
+].includes(talentKey);
+                    
                     const category = TALENTS_OBJETS[talentKey];
 
                     // = Récupération de la dernière distribution.
