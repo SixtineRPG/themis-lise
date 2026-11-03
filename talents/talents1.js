@@ -909,62 +909,88 @@ ${
       placeholder.replaceWith(button);
     });
 
-  // ========================================================
-  // BOUTONS D'ENREGISTREMENT DES RÉCOMPENSES
-  // ========================================================
+// ========================================================
+// BOUTONS D'ENREGISTREMENT DES RÉCOMPENSES
+// ========================================================
 
-  talentsJoueurs
-    .querySelectorAll('[data-button="reward"]')
-    .forEach((placeholder) => {
-      const button = Button.create({
-        text: "Valider la récompense",
-        variant: "inset",
-        size: "sm",
-        feedback: "both",
-        successText: "Récompense enregistrée !",
-        errorText: "Générer un objet d'abord",
-        errorDuration: 1000,
+talentsJoueurs
+  .querySelectorAll('[data-button="reward"]')
+  .forEach((placeholder) => {
+    const button = Button.create({
+      text: "Valider la récompense",
+      variant: "inset",
+      size: "sm",
+      feedback: "both",
+      successText: "Récompense enregistrée !",
+      errorText: "Sélectionner une récompense d'abord",
+      errorDuration: 1000,
 
-        onClick: () => {
-          const talentElement = button.closest(
-            ".talents__joueur-talent",
-          );
+      onClick: () => {
+        const talentElement = button.closest(
+          ".talents__joueur-talent",
+        );
 
-          const playerElement = button.closest(
-            ".talents__joueur",
-          );
+        const playerElement = button.closest(
+          ".talents__joueur",
+        );
 
-const dropdownItem = talentElement.querySelector(
-  ".dropdown__trigger .dropdown__member span"
-);
+        const talentName = talentElement.dataset.talent;
+        const talentKey = normalizeName(talentName);
 
-const objetName =
-  talentElement.dataset.generatedItem ||
-  dropdownItem?.textContent.trim();
+        const joueurId = playerElement.dataset.joueurId;
 
-          if (!objetName) {
-            return false;
-          }
+        // = Récupération de l'objet généré ou sélectionné.
 
-          const joueurId = playerElement.dataset.joueurId;
-          const talentName = talentElement.dataset.talent;
+        const dropdownItem = talentElement.querySelector(
+          ".dropdown__trigger .dropdown__member span",
+        );
 
-          // = Enregistrement de la modification.
+        const objetName =
+          talentElement.dataset.generatedItem ||
+          dropdownItem?.textContent.trim();
 
-          marquerModification(
-  `${joueurId}::${normalizeName(talentName)}`,
-  {
-    joueur_id: joueurId,
-    talent: talentName,
-    type: "item",
-    dernier_item: objetName,
-  },
-);
-        },
-      });
+        // = Récupération du joueur sélectionné.
 
-      placeholder.replaceWith(button);
+        const joueurSelectionne = talentElement.querySelector(
+          '[data-dropdown="passeur"] .dropdown__trigger .dropdown__member span, ' +
+          '[data-dropdown="mentor"] .dropdown__trigger .dropdown__member span, ' +
+          '[data-dropdown="transmission"] .dropdown__trigger .dropdown__member span',
+        )?.textContent.trim();
+
+        const talentsJoueursCibles = [
+          normalizeName("Passeur de savoir"),
+          normalizeName("Mentor"),
+          normalizeName("Transmission"),
+        ];
+
+        const isTalentJoueur = talentsJoueursCibles.includes(
+          talentKey,
+        );
+
+        const valeur = isTalentJoueur
+          ? joueurSelectionne
+          : objetName;
+
+        if (!valeur) {
+          return false;
+        }
+
+        // = Enregistrement de la modification.
+
+        marquerModification(
+          `${joueurId}::${talentKey}`,
+          {
+            joueur_id: joueurId,
+            talent: talentName,
+            type: isTalentJoueur ? "joueur" : "item",
+            dernier_item: valeur,
+          },
+        );
+      },
     });
+
+    placeholder.replaceWith(button);
+  });
 
   // ========================================================
   // MISE À JOUR DES DATES
@@ -978,6 +1004,7 @@ const objetName =
 
   initDropdownCristalZ(objetsData);
   initDropdownMegaGemmes(objetsData);
+  initDropdownTalents(members);
 }
 
 // ==========================================================
