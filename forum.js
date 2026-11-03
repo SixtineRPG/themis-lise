@@ -116,5 +116,12 @@ export const ForumAPI = {
 
   checkAuth() {
     return request("auth.check");
+  },
+
+  previewInventory(userId, items) {
+    return request("inventory.preview", {
+      userId,
+      items
+    });
   }
 };
