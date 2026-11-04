@@ -1754,6 +1754,13 @@ async function testInventoryPreview() {
         : null
     });
 
+    // = Position des lignes
+
+    console.log(
+      "[POSITION DES LIGNES]",
+      result.data.formDiagnostic.rowDiagnostic
+    );
+
     // = Résultat de la prévisualisation
 
     console.log("[TEST INVENTAIRE] Prévisualisation :", result);
