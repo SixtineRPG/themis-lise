@@ -1716,11 +1716,40 @@ async function testInventoryPreview() {
       "Pierre Soleil": 1
     });
 
-    // = Affichage du diagnostic du formulaire
-    console.log(
-      "[DIAGNOSTIC FORMULAIRE]",
-      result.data.formDiagnostic
-    );
+    // = Diagnostic du formulaire
+
+    const diagnostic = result.data.formDiagnostic;
+
+    console.log("[DIAGNOSTIC FORMULAIRE]", {
+      found: diagnostic.found,
+
+      action: diagnostic.action
+        ? new URL(diagnostic.action).pathname
+        : null,
+
+      method: diagnostic.method,
+      enctype: diagnostic.enctype,
+      id: diagnostic.id,
+      name: diagnostic.name,
+
+      inventoryField: diagnostic.inventoryField,
+      fields: diagnostic.fields,
+      hiddenFields: diagnostic.hiddenFields,
+      buttons: diagnostic.buttons,
+
+      saveButton: diagnostic.saveButton
+        ? {
+            index: diagnostic.saveButton.index,
+            name: diagnostic.saveButton.name,
+            value: diagnostic.saveButton.value,
+            className: diagnostic.saveButton.className,
+            disabled: diagnostic.saveButton.disabled,
+            formNoValidate: diagnostic.saveButton.formNoValidate
+          }
+        : null
+    });
+
+    // = Résultat de la prévisualisation
 
     console.log("[TEST INVENTAIRE] Prévisualisation :", result);
     console.table(result.data.changes);
