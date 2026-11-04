@@ -137,6 +137,16 @@ const TALENTS_OBJETS = {
   "Docteur du Jurassique": "fossiles",
 };
 
+// Configuration des quantités de récompenses.
+
+const TALENTS_QUANTITES = {
+  Prévoyant: {
+    nom: "Poké Balls",
+    inventaireNom: "Poké Ball",
+    quantite: 4,
+  },
+};
+
 // Configuration des dropdowns de récompenses.
 
 const TALENTS_DROPDOWNS = {
@@ -320,6 +330,20 @@ function getTargetTalents(talents) {
 
 function getTalentConfig(name) {
   return TARGET_TALENTS_BY_NAME.get(normalizeName(name));
+}
+
+// = Récupérer les objets fixes d'un talent.
+
+function getInitialInventory(talentName) {
+  const config = TALENTS_QUANTITES[talentName];
+
+  if (!config) {
+    return {};
+  }
+
+  return {
+    [config.inventaireNom || config.nom]: config.quantite,
+  };
 }
 
 // = Créer un élément HTML.
@@ -767,14 +791,19 @@ function renderPlayerTalent(player, talent, distributions) {
 
   const statutRecompense = getRewardStatus(derniereDistribution, config?.delai);
 
+  const hasInventoryReward = TALENTS_RECOMPENSES_INVENTAIRE_KEYS.has(talentKey);
+
+  const initialInventory = getInitialInventory(talentName);
+
   return `
-    <li
-      class="talents__joueur-talent"
-      data-talent="${escapeHtml(talentName)}"
-      data-delai="${config?.delai || ""}"
-      data-statut="${statutRecompense}"
-      data-date-recompense="${derniereDistribution || ""}"
-    >
+  <li
+    class="talents__joueur-talent"
+    data-talent="${escapeHtml(talentName)}"
+    data-delai="${config?.delai || ""}"
+    data-statut="${statutRecompense}"
+    data-date-recompense="${derniereDistribution || ""}"
+    ${hasInventoryReward ? `data-inventaire='${escapeHtml(JSON.stringify(initialInventory))}'` : ""}
+  >
 
       ${renderPlayerTalentInfo(talent, config)}
 
@@ -1023,6 +1052,10 @@ function initGenerateButtons() {
 
         talentElement.dataset.generatedItem = objet.nom;
 
+        updateInventoryData(talentElement);
+
+        console.log("[INVENTAIRE] Données à distribuer :", talentElement.dataset.inventaire);
+
         const result = createElement("div", "talents__objet-result");
 
         result.innerHTML = `
@@ -1037,13 +1070,9 @@ function initGenerateButtons() {
 }
 
 // = Initialiser les boutons de dates.
+
 function initDateButtons() {
   talentsJoueurs.querySelectorAll('[data-button="date-submit"]').forEach((placeholder) => {
-
-    // > On récupère les parents avant le remplacement du placeholder.
-    const talentElement = placeholder.closest(".talents__joueur-talent");
-    const playerElement = placeholder.closest(".talents__joueur");
-
     createButton(placeholder, {
       text: "Valider la date",
       variant: "inset",
@@ -1053,15 +1082,14 @@ function initDateButtons() {
       errorText: "Date invalide !",
 
       onClick: () => {
-        if (!talentElement || !playerElement) {
-          console.error("[Talents] Joueur ou talent introuvable.");
-          return false;
-        }
+        const talentElement = placeholder.closest(".talents__joueur-talent");
+
+        const playerElement = placeholder.closest(".talents__joueur");
 
         const input = talentElement.querySelector("input[type='date']");
 
-        if (!input || !input.value) {
-          input?.reportValidity();
+        if (!input.value) {
+          input.reportValidity();
           return false;
         }
 
@@ -1085,6 +1113,7 @@ function initDateButtons() {
         });
 
         talentElement.dataset.statut = getRewardStatus(input.value, delai);
+
         talentElement.dataset.dateRecompense = input.value;
 
         appliquerFiltresJoueurs();
@@ -1095,13 +1124,14 @@ function initDateButtons() {
 }
 
 // = Initialiser les boutons de récompenses.
+// = Initialiser les boutons de récompenses.
 
 function initRewardButtons() {
   talentsJoueurs.querySelectorAll('[data-button="reward"]').forEach((placeholder) => {
+    // = Récupérer les éléments parents avant de remplacer le placeholder.
 
-    // > On récupère les parents avant le remplacement du placeholder.
     const talentElement = placeholder.closest(".talents__joueur-talent");
-    const playerElement = placeholder.closest(".talents__joueur");
+    const playerElement = talentElement?.closest(".talents__joueur");
 
     createButton(placeholder, {
       text: "Valider la récompense",
@@ -1112,42 +1142,41 @@ function initRewardButtons() {
       errorText: "Sélectionner une récompense d'abord",
       errorDuration: 1000,
 
-onClick: () => {
-if (!talentElement || !playerElement) {
-  console.error("[Talents] Joueur ou talent introuvable.");
-  return false;
-}
+      onClick: () => {
+        if (!talentElement || !playerElement) {
+          throw new Error("Impossible de retrouver le joueur ou son talent.");
+        }
 
-  if (!talentElement || !playerElement) {
-    console.error("[Talents] Impossible de retrouver le joueur ou le talent.", placeholder);
-    return false;
-  }
-
-  const talentName = talentElement.dataset.talent;
-  const talentKey = normalizeName(talentName);
-
-  const joueurId = playerElement.dataset.joueurId;
-        const objetName = getSelectedObject(talentElement);
-
-        const joueurSelectionne = getSelectedPlayer(talentElement);
-
-        const input = talentElement.querySelector(".talents__joueur-talent-input");
-
-        const inputValue = input?.value.trim();
+        const talentName = talentElement.dataset.talent;
+        const talentKey = normalizeName(talentName);
+        const joueurId = playerElement.dataset.joueurId;
 
         const isPlayerReward = TALENTS_RECOMPENSE_JOUEUR_KEYS.has(talentKey);
 
+        const input = talentElement.querySelector(".talents__joueur-talent-input");
+        const inputValue = input?.value.trim();
+
+        const objetName = getSelectedObject(talentElement);
+        const joueurSelectionne = getSelectedPlayer(talentElement);
+
+        // = Récupérer la configuration de quantité.
+
+        const quantiteConfig = TALENTS_QUANTITES[talentName];
+
+        const quantite = quantiteConfig?.quantite ?? 1;
+        const objetAjoute = quantiteConfig?.nom ?? (inputValue || objetName || joueurSelectionne);
+
+        // = Déterminer la valeur enregistrée.
+
+        const value = input ? inputValue : isPlayerReward ? joueurSelectionne : objetName || quantiteConfig?.nom;
+
         const hasDropdown = talentElement.querySelector("[data-dropdown]");
-
         const hasGenerator = talentElement.querySelector('[data-button="generate"], .talents__objet-result');
-
         const hasInput = talentElement.querySelector("input:not([type='date']), select, textarea");
 
         const hasRewardSelection = hasDropdown || hasGenerator || hasInput;
 
-        const value = input ? inputValue : isPlayerReward ? joueurSelectionne : objetName;
-
-        // Vérification de l'URL.
+        // = Vérifier l'URL.
 
         if (input?.type === "url" && value) {
           try {
@@ -1163,12 +1192,26 @@ if (!talentElement || !playerElement) {
           }
         }
 
-        // Vérification de la sélection.
+        // = Vérifier la sélection.
 
         if (hasRewardSelection && !value) {
           input?.reportValidity();
           return false;
         }
+
+        // = Afficher la récompense dans la console.
+
+        if (!isPlayerReward && value) {
+          console.log("[Récompense ajoutée]", {
+            joueur: playerElement.dataset.joueurName || "Joueur inconnu",
+            joueurId,
+            talent: talentName,
+            objet: objetAjoute,
+            quantite,
+          });
+        }
+
+        // = Enregistrer la modification.
 
         marquerModification(`${joueurId}::${talentKey}`, {
           joueur_id: joueurId,
@@ -1191,6 +1234,29 @@ function getSelectedObject(talentElement) {
   const dropdownValue = dropdown?.querySelector(".dropdown__trigger .dropdown__member span")?.textContent.trim();
 
   return talentElement.dataset.generatedItem || dropdownValue;
+}
+
+// = Actualiser les objets à distribuer.
+
+function updateInventoryData(talentElement) {
+  if (!talentElement) return;
+
+  const talentName = talentElement.dataset.talent;
+
+  const inventory = getInitialInventory(talentName);
+
+  const selectedObject = getSelectedObject(talentElement);
+
+  if (selectedObject) {
+    inventory[selectedObject] = (inventory[selectedObject] || 0) + 1;
+  }
+
+  talentElement.dataset.inventaire = JSON.stringify(inventory);
+
+  console.log("[INVENTAIRE] Récompense actualisée :", {
+    talent: talentName,
+    inventaire: inventory,
+  });
 }
 
 // = Récupérer le joueur sélectionné.
@@ -1403,6 +1469,12 @@ async function initDropdownObjets(objetsData) {
                 imageKey: "image",
                 labelKey: "nom",
               }),
+
+            onChange: () => {
+              const talentElement = dropdown.closest(".talents__joueur-talent");
+
+              updateInventoryData(talentElement);
+            },
           }),
         ),
       );
