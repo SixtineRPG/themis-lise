@@ -1754,6 +1754,16 @@ async function testInventoryPreview() {
         : null
     });
 
+    console.log(
+  "[CLÉS DU DIAGNOSTIC]",
+  Object.keys(result.data.formDiagnostic)
+);
+
+console.log(
+  "[DIAGNOSTIC COMPLET]",
+  JSON.stringify(result.data.formDiagnostic, null, 2)
+);
+
     // = Position des lignes
 
     console.log(
