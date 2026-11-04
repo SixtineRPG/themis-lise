@@ -1716,6 +1716,8 @@ async function testInventoryPreview() {
       "Pierre Soleil": 1
     });
 
+    console.log("[STRUCTURE BOUTONS]", result.data.formDiagnostic.buttons);
+
     // = Diagnostic du formulaire
 
     const diagnostic = result.data.formDiagnostic;
