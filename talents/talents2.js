@@ -1659,6 +1659,51 @@ async function testInventoryPreview() {
 }
 
 // ==========================================================
+// TEST — PREPARATION INVENTAIRE
+// ==========================================================
+
+async function testInventoryPreparation() {
+  try {
+    // = Connexion au relais
+
+    await ForumAPI.connect();
+
+    // = Préparation de la mise à jour
+
+    const result = await ForumAPI.prepareInventory(
+      6,
+      {
+        "Poké Ball": 4,
+        "Pierre Soleil": 1
+      }
+    );
+
+    console.log(
+      "[TEST INVENTAIRE] Préparation :",
+      result
+    );
+
+    console.table(result.data.changes);
+
+    console.log(
+      "[TEST INVENTAIRE] Préparé :",
+      result.data.prepared
+    );
+
+    console.log(
+      "[TEST INVENTAIRE] Enregistré :",
+      result.data.submitted
+    );
+
+  } catch (error) {
+    console.error(
+      "[TEST INVENTAIRE] Erreur de préparation :",
+      error
+    );
+  }
+}
+
+// ==========================================================
 // TESTS — BOUTONS
 // ==========================================================
 
@@ -1679,3 +1724,21 @@ testInventoryButton.textContent = "Tester la prévisualisation inventaire";
 testInventoryButton.addEventListener("click", testInventoryPreview);
 
 document.body.appendChild(testInventoryButton);
+// = Préparation inventaire
+
+const testInventoryPreparationButton =
+  document.createElement("button");
+
+testInventoryPreparationButton.type = "button";
+
+testInventoryPreparationButton.textContent =
+  "Tester la préparation inventaire";
+
+testInventoryPreparationButton.addEventListener(
+  "click",
+  testInventoryPreparation
+);
+
+document.body.appendChild(
+  testInventoryPreparationButton
+);
