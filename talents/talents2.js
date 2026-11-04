@@ -1709,21 +1709,21 @@ async function testRelay() {
 
 async function testInventoryPreview() {
   try {
-    // = Connexion au relais
-
     await ForumAPI.connect();
 
-    // = Prévisualisation
+    const result = await ForumAPI.previewInventory(6, {
+      "Poké Ball": 4,
+      "Pierre Soleil": 1
+    });
 
-    const result = await ForumAPI.previewInventory(
-      6, // ID d'un joueur de test
-      {
-        "Poké Ball": 4,
-        "Pierre Soleil": 1
-      }
+    // = Affichage du diagnostic du formulaire
+    console.log(
+      "[DIAGNOSTIC FORMULAIRE]",
+      result.data.formDiagnostic
     );
 
-    console.log("[TEST INVENTAIRE] Résultat :", result);
+    console.log("[TEST INVENTAIRE] Prévisualisation :", result);
+    console.table(result.data.changes);
 
   } catch (error) {
     console.error("[TEST INVENTAIRE] Erreur :", error);
