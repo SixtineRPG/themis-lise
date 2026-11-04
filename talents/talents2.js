@@ -1716,7 +1716,10 @@ async function testInventoryPreview() {
       "Pierre Soleil": 1
     });
 
-    console.log("[STRUCTURE BOUTONS]", result.data.formDiagnostic.buttons);
+    console.log(
+  "[STRUCTURE BOUTONS]",
+  JSON.stringify(result.data.formDiagnostic.buttons, null, 2)
+);
 
     // = Diagnostic du formulaire
 
