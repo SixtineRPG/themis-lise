@@ -1728,9 +1728,12 @@ async function testInventoryPreview() {
     console.log("[DIAGNOSTIC FORMULAIRE]", {
       found: diagnostic.found,
 
-      action: diagnostic.action
-        ? new URL(diagnostic.action).pathname
-        : null,
+    action: diagnostic.action
+  ? new URL(
+      diagnostic.action,
+      "https://war-of-the-gods.forumactif.com"
+    ).pathname
+  : null,
 
       method: diagnostic.method,
       enctype: diagnostic.enctype,
