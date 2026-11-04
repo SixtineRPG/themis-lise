@@ -34,7 +34,7 @@ function connect() {
     const timeout = setTimeout(() => {
       window.removeEventListener("message", onReady);
       reject(new Error("relay_timeout"));
-    }, 15000);
+    }, 30000);
 
     function onReady(event) {
       if (event.origin !== RELAY_ORIGIN) return;
@@ -103,10 +103,6 @@ window.addEventListener("message", (event) => {
   }
 });
 
-// ==========================================================
-// API PUBLIQUE
-// ==========================================================
-
 export const ForumAPI = {
   connect,
 
@@ -120,6 +116,13 @@ export const ForumAPI = {
 
   previewInventory(userId, items) {
     return request("inventory.preview", {
+      userId,
+      items
+    });
+  },
+
+  prepareInventory(userId, items) {
+    return request("inventory.prepare", {
       userId,
       items
     });
