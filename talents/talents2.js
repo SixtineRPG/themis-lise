@@ -1764,6 +1764,16 @@ console.log(
   JSON.stringify(result.data.formDiagnostic, null, 2)
 );
 
+    console.log(
+  "[LIGNE INVENTAIRE]",
+  result.data.formDiagnostic.inventoryRowHTML
+);
+
+console.log(
+  "[ATTRIBUTS FORMULAIRE]",
+  result.data.formDiagnostic.formAttributes
+);
+
     // = Position des lignes
 
     console.log(
