@@ -1777,6 +1777,11 @@ console.log(
   result.data.formDiagnostic.formAttributes
 );
 
+    console.log(
+  "[DETAILS BOUTONS]",
+  result.data.formDiagnostic.buttonDetails
+);
+
     // = Position des lignes
 
     console.log(
