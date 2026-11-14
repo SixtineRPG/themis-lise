@@ -1,7 +1,7 @@
 import { Button } from "https://sixtinerpg.github.io/themis-lise/components/buttons/buttons.js";
 import { DateFilter } from "https://sixtinerpg.github.io/themis-lise/components/date-filter/date-filter.js";
 import { Dropdown } from "https://sixtinerpg.github.io/themis-lise/components/dropdown/dropdown.js";
-import { ForumAPI } from "https://sixtinerpg.github.io/themis-lise/forum.js?v=1";
+import { ForumAPI } from "https://sixtinerpg.github.io/themis-lise/forum.js?v=2";
 // ==========================================================
 // CONFIGURATION
 // ==========================================================
@@ -1127,101 +1127,177 @@ function initDateButtons() {
 // = Initialiser les boutons de récompenses.
 
 function initRewardButtons() {
-  talentsJoueurs.querySelectorAll('[data-button="reward"]').forEach((placeholder) => {
-    // = Récupérer les éléments parents avant de remplacer le placeholder.
+  // ========================================================
+  // BOUTONS DE VALIDATION DES RÉCOMPENSES
+  // ========================================================
 
-    const talentElement = placeholder.closest(".talents__joueur-talent");
-    const playerElement = talentElement?.closest(".talents__joueur");
+  talentsJoueurs
+    .querySelectorAll('[data-button="reward"]')
+    .forEach((placeholder) => {
+      const button = Button.create({
+        text: "Valider la récompense",
+        variant: "inset",
+        size: "sm",
+        feedback: "both",
+        successText: "Récompense enregistrée !",
+        errorText: "Impossible d'enregistrer la récompense.",
+        errorDuration: 2000,
 
-    createButton(placeholder, {
-      text: "Valider la récompense",
-      variant: "inset",
-      size: "sm",
-      feedback: "both",
-      successText: "Récompense enregistrée !",
-      errorText: "Sélectionner une récompense d'abord",
-      errorDuration: 1000,
+        onClick: async () => {
+          // ==================================================
+          // RÉCUPÉRATION DES ÉLÉMENTS
+          // ==================================================
 
-      onClick: () => {
-        if (!talentElement || !playerElement) {
-          throw new Error("Impossible de retrouver le joueur ou son talent.");
-        }
+          const talentElement = button.closest(
+            ".talents__joueur-talent",
+          );
 
-        const talentName = talentElement.dataset.talent;
-        const talentKey = normalizeName(talentName);
-        const joueurId = playerElement.dataset.joueurId;
+          const playerElement = button.closest(
+            ".talents__joueur",
+          );
 
-        const isPlayerReward = TALENTS_RECOMPENSE_JOUEUR_KEYS.has(talentKey);
-
-        const input = talentElement.querySelector(".talents__joueur-talent-input");
-        const inputValue = input?.value.trim();
-
-        const objetName = getSelectedObject(talentElement);
-        const joueurSelectionne = getSelectedPlayer(talentElement);
-
-        // = Récupérer la configuration de quantité.
-
-        const quantiteConfig = TALENTS_QUANTITES[talentName];
-
-        const quantite = quantiteConfig?.quantite ?? 1;
-        const objetAjoute = quantiteConfig?.nom ?? (inputValue || objetName || joueurSelectionne);
-
-        // = Déterminer la valeur enregistrée.
-
-        const value = input ? inputValue : isPlayerReward ? joueurSelectionne : objetName || quantiteConfig?.nom;
-
-        const hasDropdown = talentElement.querySelector("[data-dropdown]");
-        const hasGenerator = talentElement.querySelector('[data-button="generate"], .talents__objet-result');
-        const hasInput = talentElement.querySelector("input:not([type='date']), select, textarea");
-
-        const hasRewardSelection = hasDropdown || hasGenerator || hasInput;
-
-        // = Vérifier l'URL.
-
-        if (input?.type === "url" && value) {
-          try {
-            const url = new URL(value);
-
-            if (!["http:", "https:"].includes(url.protocol)) {
-              input.reportValidity();
-              return false;
-            }
-          } catch {
-            input.reportValidity();
-            return false;
+          if (!talentElement || !playerElement) {
+            throw new Error(
+              "Impossible de retrouver le joueur ou le talent.",
+            );
           }
-        }
 
-        // = Vérifier la sélection.
+          // ==================================================
+          // RÉCUPÉRATION DU JOUEUR
+          // ==================================================
 
-        if (hasRewardSelection && !value) {
-          input?.reportValidity();
-          return false;
-        }
+          const joueurId = Number(
+            playerElement.dataset.joueurId,
+          );
 
-        // = Afficher la récompense dans la console.
+          const talentName = talentElement.dataset.talent;
 
-        if (!isPlayerReward && value) {
-          console.log("[Récompense ajoutée]", {
-            joueur: playerElement.dataset.joueurName || "Joueur inconnu",
+          if (!Number.isSafeInteger(joueurId) || joueurId < 1) {
+            throw new Error("Identifiant du joueur invalide.");
+          }
+
+          if (!talentName) {
+            throw new Error("Nom du talent introuvable.");
+          }
+
+          // ==================================================
+          // RÉCUPÉRATION DE L'OBJET
+          // ==================================================
+
+          const generatedItem =
+            talentElement.dataset.generatedItem;
+
+          const dropdownValue = talentElement
+            .querySelector(
+              ".dropdown__trigger .dropdown__value",
+            )
+            ?.textContent.trim();
+
+          const objetName = generatedItem || dropdownValue;
+
+          if (!objetName) {
+            throw new Error(
+              "Génère ou sélectionne un objet avant de valider.",
+            );
+          }
+
+          // ==================================================
+          // RÉCUPÉRATION DE L'INVENTAIRE À AJOUTER
+          // ==================================================
+
+          let inventaire;
+
+          if (talentElement.dataset.inventaire) {
+            try {
+              inventaire = JSON.parse(
+                talentElement.dataset.inventaire,
+              );
+            } catch {
+              throw new Error(
+                "Les données de l'inventaire sont invalides.",
+              );
+            }
+          } else {
+            inventaire = {
+              [objetName]: 1,
+            };
+          }
+
+          if (
+            !inventaire ||
+            typeof inventaire !== "object" ||
+            Array.isArray(inventaire) ||
+            !Object.keys(inventaire).length
+          ) {
+            throw new Error(
+              "Aucun objet valide à ajouter à l'inventaire.",
+            );
+          }
+
+          console.info(
+            "[THEMIS] Récompense à distribuer :",
+            {
+              joueurId,
+              talentName,
+              inventaire,
+            },
+          );
+
+          // ==================================================
+          // CONNEXION AU RELAIS FORUMACTIF
+          // ==================================================
+
+          await ForumAPI.connect();
+
+          // ==================================================
+          // MISE À JOUR DE L'INVENTAIRE
+          // ==================================================
+
+          const response = await ForumAPI.prepareInventory(
             joueurId,
-            talent: talentName,
-            objet: objetAjoute,
-            quantite,
-          });
-        }
+            inventaire,
+          );
 
-        // = Enregistrer la modification.
+          const result = response.data;
 
-        marquerModification(`${joueurId}::${talentKey}`, {
-          joueur_id: joueurId,
-          talent: talentName,
-          type: isPlayerReward ? "joueur" : "item",
-          dernier_item: value || "",
-        });
-      },
+          if (!result?.submitted || !result?.verified) {
+            throw new Error(
+              "L'enregistrement de l'inventaire n'a pas pu être vérifié.",
+            );
+          }
+
+          console.info(
+            "[THEMIS] Inventaire mis à jour et vérifié :",
+            result,
+          );
+
+          // ==================================================
+          // ENREGISTREMENT DE LA MODIFICATION GOOGLE SHEETS
+          // ==================================================
+
+          marquerModification(
+            `${joueurId}::${normalizeName(talentName)}`,
+            {
+              joueur_id: String(joueurId),
+              talent: talentName,
+              type: "item",
+              dernier_item: objetName,
+            },
+          );
+
+          console.info(
+            "[THEMIS] Récompense enregistrée :",
+            {
+              joueurId,
+              talentName,
+              objetName,
+            },
+          );
+        },
+      });
+
+      placeholder.replaceWith(button);
     });
-  });
 }
 
 // = Récupérer l'objet sélectionné.
