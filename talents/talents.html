@@ -10,8 +10,8 @@
     <link rel="stylesheet" href="https://sixtinerpg.github.io/themis-lise/talents/talents.css" />
     <link rel="stylesheet" href="https://sixtinerpg.github.io/themis-lise/components/buttons/buttons.css" />
     <link rel="stylesheet" href="https://sixtinerpg.github.io/themis-lise/components/dropdown/dropdown.css" />
-        <link rel="stylesheet" href="https://sixtinerpg.github.io/themis-lise/components/date-filter/date-filter.css" />
-    <!--<script src="../../shared/js/navbar.js"></script>-->
+    <link rel="stylesheet" href="https://sixtinerpg.github.io/themis-lise/components/date-filter/date-filter.css" />
+    <script src="../../shared/js/navbar.js"></script>
   </head>
   <body data-tool="talents">
     <!-- > Header. -->
@@ -23,7 +23,7 @@
       </div>
       <div class="hero__img"></div>
     </header>
-    <sidebar class="container">        <div id="dropdown-joueurs"></div>
+    <sidebar class="container">
       <section class="talents__list">
         <h2 class="talents__title">Talents concernés</h2>
         <p class="talents__description">Liste des talents concernés par le don d'objet par quinzaine.</p>
@@ -35,34 +35,25 @@
         <ul class="talents__items" id="talents-list"></ul>
       </section>
     </sidebar>
-    <main class="container">
-<div class="talents__synchronisation">
-  <button type="button" id="synchroniser-sheets">
-    Synchroniser Google Sheets
-  </button>
+    <main class="talents__main">
+      <section class="talents__main-filter container">
+        <div class="talents__synchronisation">
+          <span id="synchroniser-sheets"></span>
 
-  <span id="synchroniser-compteur">
-    Aucune modification en attente
-  </span>
+          <span id="synchroniser-compteur">Aucune modification en attente</span>
 
-  <div
-    class="talents__synchronisation-message"
-    id="synchroniser-message"
-    aria-live="polite"
-  ></div>
+          <div class="talents__synchronisation-message" id="synchroniser-message" aria-live="polite" data-status="success">Synchronisation terminée !</div>
 
-  <iframe
-    id="synchroniser-frame"
-    name="synchroniser-frame"
-    hidden
-  ></iframe>
-</div>
-
-      <section class="talents__main">
+          <iframe id="synchroniser-frame" name="synchroniser-frame" hidden></iframe>
+        </div>
+        <div id="dropdown-joueurs"></div>
+        <div id="dropdown-talents"></div>
+      </section>
+      <section class="talents__main-talents container">
         <h2 class="talents__title">Répartition des talents</h2>
         <ul class="talents__joueurs" id="talents-joueurs"></ul>
       </section>
     </main>
-<script type="module" src="https://sixtinerpg.github.io/themis-lise/talents/talents2.js?v=23>"></script>
+<script type="module" src="https://sixtinerpg.github.io/themis-lise/talents/talents3.js?v=1>"></script>
   </body>
 </html>
