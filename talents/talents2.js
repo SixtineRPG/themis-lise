@@ -797,7 +797,7 @@ function renderPlayerTalent(player, talent, distributions) {
   const initialInventory = getInitialInventory(talentName);
 
   return `
-  <li
+  <article
     class="talents__joueur-talent"
     data-talent="${escapeHtml(talentName)}"
     data-delai="${config?.delai || ""}"
@@ -806,26 +806,28 @@ function renderPlayerTalent(player, talent, distributions) {
     ${hasInventoryReward ? `data-inventaire='${escapeHtml(JSON.stringify(initialInventory))}'` : ""}
   >
 
-      ${renderPlayerTalentInfo(talent, config)}
+      ${renderPlayerTalentInfo(talent, config, prochaineDistribution)}
 
       ${renderPlayerTalentHistory(talentKey, dernierItem, dernierObjet, derniereDistribution)}
 
       ${renderTalentGeneration(player, talentKey, category)}
 
-      ${renderTalentDistribution(prochaineDistribution, TALENTS_RECOMPENSES_INVENTAIRE_KEYS.has(talentKey))}
+      ${renderTalentDistribution(TALENTS_RECOMPENSES_INVENTAIRE_KEYS.has(talentKey))}
 
-    </li>
+    </article>
   `;
 }
 
 // = Informations du talent.
-
-function renderPlayerTalentInfo(talent, config) {
+function renderPlayerTalentInfo(talent, config, prochaineDistribution) {
   return `
     <div class="talents__joueur-talent-info">
       ${renderTalentIcon(talent, "talents__joueur-talent-info-icon")}
+      <div class="talents__joueur-talent-info-prochaine-date">
+        ${formatDate(prochaineDistribution)}
+      </div>
 
-      <h4 class="talents__joueur-talent-info-name">
+      <h4 class="talents__joueur-talent-info-title">
         ${escapeHtml(talent.nom)}
       </h4>
 
@@ -845,11 +847,7 @@ function renderPlayerTalentHistory(talentKey, dernierItem, dernierObjet, dernier
     <div class="talents__joueur-talent-historique">
 
       <div class="talents__joueur-talent-historique-derniere-date">
-        <span>Dernière distribution</span>
-
-        <strong>
           ${formatDistributionDate(derniereDistribution)}
-        </strong>
       </div>
 
       ${hideLastItem ? "" : renderLastItem(dernierItem, dernierObjet, talentKey)}
@@ -866,11 +864,8 @@ function renderLastItem(dernierItem, dernierObjet, talentKey) {
   if (isCapture) {
     return `
       <div class="talents__joueur-talent-historique-dernier-item">
-        <span class="talents__joueur-talent-historique-dernier-item-title">
-          Dernier objet distribué
-        </span>
-
-        <strong class="talents__joueur-talent-historique-dernier-item-name">
+        <span class="talents__joueur-talent-historique-dernier-item-name">
+        <i class="fa-solid fa-arrow-right"></i>
           ${
             dernierItem
               ? `
@@ -882,16 +877,14 @@ function renderLastItem(dernierItem, dernierObjet, talentKey) {
               `
               : "—"
           }
-        </strong>
+        </span>
       </div>
     `;
   }
 
   return `
     <div class="talents__joueur-talent-historique-dernier-item">
-      <span class="talents__joueur-talent-historique-dernier-item-title">
-        Dernier objet distribué
-      </span>
+    <i class="fa-solid fa-arrow-right"></i>
 
       ${
         dernierObjet?.image
@@ -905,9 +898,9 @@ function renderLastItem(dernierItem, dernierObjet, talentKey) {
           : ""
       }
 
-      <strong class="talents__joueur-talent-historique-dernier-item-name">
+      <span class="talents__joueur-talent-historique-dernier-item-name">
         ${escapeHtml(dernierItem || "—")}
-      </strong>
+      </span>
     </div>
   `;
 }
