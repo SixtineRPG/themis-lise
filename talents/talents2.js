@@ -313,6 +313,7 @@ function createNormalizedMap(object) {
 const TARGET_TALENTS_BY_NAME = createNormalizedMap(TARGET_TALENTS);
 const TALENTS_OBJETS_BY_NAME = createNormalizedMap(TALENTS_OBJETS);
 const TALENTS_DROPDOWNS_BY_NAME = createNormalizedMap(TALENTS_DROPDOWNS);
+const TALENTS_QUANTITES_BY_NAME = createNormalizedMap(TALENTS_QUANTITES);
 
 const TALENTS_RECOMPENSES_INVENTAIRE_KEYS = new Set([...TALENTS_RECOMPENSES_INVENTAIRE].map(normalizeName));
 
@@ -339,9 +340,7 @@ function getInitialInventory(talentName) {
     normalizeName(talentName)
   );
 
-  if (!config) {
-    return {};
-  }
+  if (!config) return {};
 
   return {
     [config.inventaireNom || config.nom]: config.quantite,
@@ -1028,51 +1027,67 @@ function createButton(placeholder, config) {
 // = Initialiser les boutons de génération.
 
 function initGenerateButtons() {
-  talentsJoueurs.querySelectorAll('[data-button="generate"]').forEach((placeholder) => {
-    const category = placeholder.dataset.category;
+  talentsJoueurs
+    .querySelectorAll('[data-button="generate"]')
+    .forEach((placeholder) => {
+      const category = placeholder.dataset.category;
 
-    const button = createButton(placeholder, {
-      text: "Générer aléatoirement",
-      variant: "inset",
-      size: "sm",
-      icon: "fa-solid fa-dice",
-      iconPosition: "right",
-      feedback: "error",
-      errorText: "Aucun objet disponible",
-      className: "talents__generer",
+      const button = createButton(placeholder, {
+        text: "Générer aléatoirement",
+        variant: "inset",
+        size: "sm",
+        icon: "fa-solid fa-dice",
+        iconPosition: "right",
+        feedback: "error",
+        errorText: "Aucun objet disponible",
+        className: "talents__generer",
 
-      onClick: () => {
-        const availableObjects = objetsData[category] || [];
+        onClick: () => {
+          const availableObjects = objetsData[category] || [];
 
-        if (!availableObjects.length) {
-          throw new Error("Aucun objet disponible");
-        }
+          if (!availableObjects.length) {
+            throw new Error("Aucun objet disponible");
+          }
 
-        const objet = availableObjects[Math.floor(Math.random() * availableObjects.length)];
+          const objet =
+            availableObjects[
+              Math.floor(Math.random() * availableObjects.length)
+            ];
 
-        const talentElement = button.closest(".talents__joueur-talent");
+          const talentElement = button.closest(
+            ".talents__joueur-talent"
+          );
 
-        talentElement.dataset.generatedItem = objet.nom;
+          if (!talentElement) {
+            throw new Error("Talent introuvable.");
+          }
 
-        updateInventoryData(talentElement);
+          talentElement.dataset.generatedItem = objet.nom;
 
-        console.log("[INVENTAIRE] Données à distribuer :", talentElement.dataset.inventaire);
+          updateInventoryData(talentElement);
 
-        const result = createElement("div", "talents__objet-result");
+          console.log(
+            "[INVENTAIRE] Données à distribuer :",
+            talentElement.dataset.inventaire
+          );
 
-        result.innerHTML = `
+          const result = createElement(
+            "div",
+            "talents__objet-result"
+          );
+
+          result.innerHTML = `
             ${objet.image ? `<img src="${escapeHtml(objet.image)}" alt="">` : ""}
             <span>${escapeHtml(objet.nom)}</span>
           `;
 
-        button.replaceWith(result);
-      },
+          button.replaceWith(result);
+        },
+      });
     });
-  });
 }
 
 // = Initialiser les boutons de dates.
-
 
 function initDateButtons() {
   talentsJoueurs
@@ -1134,6 +1149,10 @@ function initDateButtons() {
             delai
           );
 
+          if (!prochaineDistribution) {
+            throw new Error("Impossible de calculer la prochaine date.");
+          }
+
           const nextDateElement = talentElement.querySelector(
             ".talents__joueur-talent-prochaine-date"
           );
@@ -1173,11 +1192,6 @@ function initDateButtons() {
 }
 
 // = Initialiser les boutons de récompenses.
-// = Initialiser les boutons de récompenses.
-
-  // ========================================================
-  // BOUTONS DE VALIDATION DES RÉCOMPENSES
-  // ========================================================
 
 function initRewardButtons() {
   talentsJoueurs
@@ -1193,30 +1207,26 @@ function initRewardButtons() {
         errorDuration: 2000,
 
         onClick: async () => {
-          // ==================================================
-          // RÉCUPÉRATION DES ÉLÉMENTS
-          // ==================================================
+          // = Récupérer les éléments
 
           const talentElement = button.closest(
-            ".talents__joueur-talent",
+            ".talents__joueur-talent"
           );
 
           const playerElement = button.closest(
-            ".talents__joueur",
+            ".talents__joueur"
           );
 
           if (!talentElement || !playerElement) {
             throw new Error(
-              "Impossible de retrouver le joueur ou le talent.",
+              "Impossible de retrouver le joueur ou le talent."
             );
           }
 
-          // ==================================================
-          // RÉCUPÉRATION DU JOUEUR
-          // ==================================================
+          // = Récupérer le joueur
 
           const joueurId = Number(
-            playerElement.dataset.joueurId,
+            playerElement.dataset.joueurId
           );
 
           const talentName = talentElement.dataset.talent;
@@ -1229,13 +1239,7 @@ function initRewardButtons() {
             throw new Error("Nom du talent introuvable.");
           }
 
-          // ==================================================
-          // RÉCUPÉRATION DE LA RÉCOMPENSE
-          // ==================================================
-
-          const talentKey = normalizeName(talentName);
-
-          // = Récupérer la récompense fixe ou générée
+          // = Récupérer la récompense
 
           const initialInventory = getInitialInventory(talentName);
 
@@ -1244,7 +1248,7 @@ function initRewardButtons() {
 
           const dropdownValue = talentElement
             .querySelector(
-              ".dropdown__trigger .dropdown__value",
+              ".dropdown__trigger .dropdown__value"
             )
             ?.textContent.trim();
 
@@ -1252,7 +1256,7 @@ function initRewardButtons() {
 
           // = Construire l'inventaire
 
-          let inventaire = { ...initialInventory };
+          const inventaire = { ...initialInventory };
 
           if (objetName && !Object.keys(initialInventory).length) {
             inventaire[objetName] = 1;
@@ -1262,7 +1266,7 @@ function initRewardButtons() {
 
           if (!Object.keys(inventaire).length) {
             throw new Error(
-              "Génère ou sélectionne un objet avant de valider.",
+              "Génère ou sélectionne un objet avant de valider."
             );
           }
 
@@ -1272,40 +1276,34 @@ function initRewardButtons() {
               joueurId,
               talentName,
               inventaire,
-            },
+            }
           );
 
-          // ==================================================
-          // CONNEXION AU RELAIS FORUMACTIF
-          // ==================================================
+          // = Se connecter au relais
 
           await ForumAPI.connect();
 
-          // ==================================================
-          // MISE À JOUR DE L'INVENTAIRE
-          // ==================================================
+          // = Mettre à jour l'inventaire
 
           const response = await ForumAPI.prepareInventory(
             joueurId,
-            inventaire,
+            inventaire
           );
 
           const result = response.data;
 
           if (!result?.submitted || !result?.verified) {
             throw new Error(
-              "L'enregistrement de l'inventaire n'a pas pu être vérifié.",
+              "L'enregistrement de l'inventaire n'a pas pu être vérifié."
             );
           }
 
           console.info(
             "[THEMIS] Inventaire mis à jour et vérifié :",
-            result,
+            result
           );
 
-          // ==================================================
-          // ENREGISTREMENT DE LA MODIFICATION GOOGLE SHEETS
-          // ==================================================
+          // = Enregistrer la modification Google Sheets
 
           marquerModification(
             `${joueurId}::${normalizeName(talentName)}`,
@@ -1314,7 +1312,7 @@ function initRewardButtons() {
               talent: talentName,
               type: "item",
               dernier_item: objetName,
-            },
+            }
           );
 
           console.info(
@@ -1323,26 +1321,30 @@ function initRewardButtons() {
               joueurId,
               talentName,
               objetName,
-            },
+            }
           );
         },
       });
     });
 }
-
 // = Récupérer l'objet sélectionné.
-
 function getSelectedObject(talentElement) {
   const dropdown = talentElement.querySelector(
-    ['[data-dropdown="cristal-z"]', '[data-dropdown="mega-gemmes"]', '[data-dropdown="dynamax"]', '[data-dropdown="teracristal"]', '[data-dropdown="ct"]'].join(", "),
+    [
+      '[data-dropdown="cristal-z"]',
+      '[data-dropdown="mega-gemmes"]',
+      '[data-dropdown="dynamax"]',
+      '[data-dropdown="teracristal"]',
+      '[data-dropdown="ct"]',
+    ].join(", ")
   );
 
-  const dropdownValue = dropdown?.querySelector(".dropdown__trigger .dropdown__member span")?.textContent.trim();
+  const dropdownValue = dropdown
+    ?.querySelector(".dropdown__trigger .dropdown__member span")
+    ?.textContent.trim();
 
   return talentElement.dataset.generatedItem || dropdownValue;
 }
-
-// = Actualiser les objets à distribuer.
 
 // = Actualiser les objets à distribuer.
 
@@ -1355,11 +1357,10 @@ function updateInventoryData(talentElement) {
 
   const inventory = getInitialInventory(talentName);
 
-  // = Ne pas ajouter d'objet supplémentaire pour Prévoyant
+  // = Ne pas ajouter d'objet supplémentaire pour les récompenses fixes
 
   if (Object.keys(inventory).length) {
     talentElement.dataset.inventaire = JSON.stringify(inventory);
-
     return;
   }
 
