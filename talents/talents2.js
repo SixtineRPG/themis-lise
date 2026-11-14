@@ -335,7 +335,9 @@ function getTalentConfig(name) {
 // = Récupérer les objets fixes d'un talent.
 
 function getInitialInventory(talentName) {
-  const config = TALENTS_QUANTITES[talentName];
+  const config = TALENTS_QUANTITES_BY_NAME.get(
+    normalizeName(talentName)
+  );
 
   if (!config) {
     return {};
@@ -1071,70 +1073,117 @@ function initGenerateButtons() {
 
 // = Initialiser les boutons de dates.
 
+
 function initDateButtons() {
-  talentsJoueurs.querySelectorAll('[data-button="date-submit"]').forEach((placeholder) => {
-    createButton(placeholder, {
-      text: "Valider la date",
-      variant: "inset",
-      size: "sm",
-      feedback: "both",
-      successText: "Date enregistrée !",
-      errorText: "Date invalide !",
+  talentsJoueurs
+    .querySelectorAll('[data-button="date-submit"]')
+    .forEach((placeholder) => {
+      const button = createButton(placeholder, {
+        text: "Valider la date",
+        variant: "inset",
+        size: "sm",
+        feedback: "both",
+        successText: "Date enregistrée !",
+        errorText: "Date invalide !",
 
-      onClick: () => {
-        const talentElement = placeholder.closest(".talents__joueur-talent");
+        onClick: () => {
+          // = Récupérer les éléments
 
-        const playerElement = placeholder.closest(".talents__joueur");
+          const talentElement = button.closest(
+            ".talents__joueur-talent"
+          );
 
-        const input = talentElement.querySelector("input[type='date']");
+          const playerElement = button.closest(
+            ".talents__joueur"
+          );
 
-        if (!input.value) {
-          input.reportValidity();
-          return false;
-        }
+          if (!talentElement || !playerElement) {
+            console.error("[DATE] Éléments introuvables :", {
+              talentElement,
+              playerElement,
+              button,
+            });
 
-        const joueurId = playerElement.dataset.joueurId;
-        const talentName = talentElement.dataset.talent;
-        const delai = talentElement.dataset.delai;
+            throw new Error(
+              "Impossible de retrouver le joueur ou le talent."
+            );
+          }
 
-        const prochaineDistribution = getNextDistribution(input.value, delai);
+          // = Récupérer la date
 
-        const nextDateElement = talentElement.querySelector(".talents__joueur-talent-prochaine-date");
+          const input = talentElement.querySelector(
+            ".talents__joueur-talent-distribution-date-input"
+          );
 
-        if (nextDateElement) {
-          nextDateElement.textContent = formatDate(prochaineDistribution);
-        }
+          if (!input || !input.value) {
+            input?.reportValidity();
 
-        marquerModification(`${joueurId}::${normalizeName(talentName)}`, {
-          joueur_id: joueurId,
-          talent: talentName,
-          type: "date",
-          derniere_distribution: input.value,
-        });
+            throw new Error("Date invalide !");
+          }
 
-        talentElement.dataset.statut = getRewardStatus(input.value, delai);
+          // = Récupérer les informations
 
-        talentElement.dataset.dateRecompense = input.value;
+          const joueurId = playerElement.dataset.joueurId;
+          const talentName = talentElement.dataset.talent;
+          const delai = talentElement.dataset.delai;
 
-        appliquerFiltresJoueurs();
-        updateDistributionDates();
-      },
+          // = Calculer la prochaine distribution
+
+          const prochaineDistribution = getNextDistribution(
+            input.value,
+            delai
+          );
+
+          const nextDateElement = talentElement.querySelector(
+            ".talents__joueur-talent-prochaine-date"
+          );
+
+          if (nextDateElement) {
+            nextDateElement.textContent = formatDate(
+              prochaineDistribution
+            );
+          }
+
+          // = Enregistrer la modification
+
+          marquerModification(
+            `${joueurId}::${normalizeName(talentName)}`,
+            {
+              joueur_id: joueurId,
+              talent: talentName,
+              type: "date",
+              derniere_distribution: input.value,
+            }
+          );
+
+          // = Actualiser le statut
+
+          talentElement.dataset.statut = getRewardStatus(
+            input.value,
+            delai
+          );
+
+          talentElement.dataset.dateRecompense = input.value;
+
+          appliquerFiltresJoueurs();
+          updateDistributionDates();
+        },
+      });
     });
-  });
 }
 
 // = Initialiser les boutons de récompenses.
 // = Initialiser les boutons de récompenses.
 
-function initRewardButtons() {
   // ========================================================
   // BOUTONS DE VALIDATION DES RÉCOMPENSES
   // ========================================================
 
+function initRewardButtons() {
   talentsJoueurs
     .querySelectorAll('[data-button="reward"]')
     .forEach((placeholder) => {
-      const button = Button.create({
+      const button = createButton(placeholder, {
         text: "Valider la récompense",
         variant: "inset",
         size: "sm",
@@ -1181,8 +1230,14 @@ function initRewardButtons() {
           }
 
           // ==================================================
-          // RÉCUPÉRATION DE L'OBJET
+          // RÉCUPÉRATION DE LA RÉCOMPENSE
           // ==================================================
+
+          const talentKey = normalizeName(talentName);
+
+          // = Récupérer la récompense fixe ou générée
+
+          const initialInventory = getInitialInventory(talentName);
 
           const generatedItem =
             talentElement.dataset.generatedItem;
@@ -1195,42 +1250,19 @@ function initRewardButtons() {
 
           const objetName = generatedItem || dropdownValue;
 
-          if (!objetName) {
+          // = Construire l'inventaire
+
+          let inventaire = { ...initialInventory };
+
+          if (objetName && !Object.keys(initialInventory).length) {
+            inventaire[objetName] = 1;
+          }
+
+          // = Vérifier l'inventaire
+
+          if (!Object.keys(inventaire).length) {
             throw new Error(
               "Génère ou sélectionne un objet avant de valider.",
-            );
-          }
-
-          // ==================================================
-          // RÉCUPÉRATION DE L'INVENTAIRE À AJOUTER
-          // ==================================================
-
-          let inventaire;
-
-          if (talentElement.dataset.inventaire) {
-            try {
-              inventaire = JSON.parse(
-                talentElement.dataset.inventaire,
-              );
-            } catch {
-              throw new Error(
-                "Les données de l'inventaire sont invalides.",
-              );
-            }
-          } else {
-            inventaire = {
-              [objetName]: 1,
-            };
-          }
-
-          if (
-            !inventaire ||
-            typeof inventaire !== "object" ||
-            Array.isArray(inventaire) ||
-            !Object.keys(inventaire).length
-          ) {
-            throw new Error(
-              "Aucun objet valide à ajouter à l'inventaire.",
             );
           }
 
@@ -1295,8 +1327,6 @@ function initRewardButtons() {
           );
         },
       });
-
-      placeholder.replaceWith(button);
     });
 }
 
@@ -1314,17 +1344,31 @@ function getSelectedObject(talentElement) {
 
 // = Actualiser les objets à distribuer.
 
+// = Actualiser les objets à distribuer.
+
 function updateInventoryData(talentElement) {
   if (!talentElement) return;
 
   const talentName = talentElement.dataset.talent;
 
+  // = Récupérer les récompenses fixes
+
   const inventory = getInitialInventory(talentName);
+
+  // = Ne pas ajouter d'objet supplémentaire pour Prévoyant
+
+  if (Object.keys(inventory).length) {
+    talentElement.dataset.inventaire = JSON.stringify(inventory);
+
+    return;
+  }
+
+  // = Récupérer l'objet sélectionné ou généré
 
   const selectedObject = getSelectedObject(talentElement);
 
   if (selectedObject) {
-    inventory[selectedObject] = (inventory[selectedObject] || 0) + 1;
+    inventory[selectedObject] = 1;
   }
 
   talentElement.dataset.inventaire = JSON.stringify(inventory);
