@@ -1,4 +1,3 @@
-
 /* ==========================================================
    THEMIS — FORUM API
    Communication avec le relais Forumactif
@@ -12,6 +11,8 @@ const RELAY_ORIGIN =
 
 let relayWindow = null;
 let requestId = 0;
+let connectionPromise = null;
+
 const pendingRequests = new Map();
 
 // ==========================================================
@@ -19,6 +20,26 @@ const pendingRequests = new Map();
 // ==========================================================
 
 function connect() {
+  // = Réutilisation du relais déjà ouvert.
+
+  if (relayWindow && !relayWindow.closed) {
+    return request("relay.ping")
+      .then(() => true)
+      .catch(() => {
+        relayWindow = null;
+        connectionPromise = null;
+        return connect();
+      });
+  }
+
+  // = Évite plusieurs connexions simultanées.
+
+  if (connectionPromise) {
+    return connectionPromise;
+  }
+
+  // = Ouverture du relais.
+
   relayWindow = window.open(
     RELAY_URL,
     "themisRelay",
@@ -30,9 +51,10 @@ function connect() {
     return Promise.reject(new Error("popup_blocked"));
   }
 
-  return new Promise((resolve, reject) => {
+  connectionPromise = new Promise((resolve, reject) => {
     const timeout = setTimeout(() => {
       window.removeEventListener("message", onReady);
+      connectionPromise = null;
       reject(new Error("relay_timeout"));
     }, 30000);
 
@@ -44,12 +66,14 @@ function connect() {
       clearTimeout(timeout);
       window.removeEventListener("message", onReady);
 
-      resolve(true);
       console.info("[THEMIS API] Relais connecté.");
+      resolve(true);
     }
 
     window.addEventListener("message", onReady);
   });
+
+  return connectionPromise;
 }
 
 // ==========================================================
@@ -67,21 +91,28 @@ function request(action, payload = {}) {
     const timeout = setTimeout(() => {
       pendingRequests.delete(id);
       reject(new Error("request_timeout"));
-    }, 10000);
+    }, 30000);
 
-    pendingRequests.set(id, { resolve, reject, timeout });
+    pendingRequests.set(id, {
+      resolve,
+      reject,
+      timeout
+    });
 
-    relayWindow.postMessage({
-      type: "THEMIS_REQUEST",
-      requestId: id,
-      action,
-      payload
-    }, RELAY_ORIGIN);
+    relayWindow.postMessage(
+      {
+        type: "THEMIS_REQUEST",
+        requestId: id,
+        action,
+        payload
+      },
+      RELAY_ORIGIN
+    );
   });
 }
 
 // ==========================================================
-// REPONSES
+// RÉCEPTION DES RÉPONSES
 // ==========================================================
 
 window.addEventListener("message", (event) => {
@@ -102,6 +133,10 @@ window.addEventListener("message", (event) => {
     pending.reject(new Error(event.data.error));
   }
 });
+
+// ==========================================================
+// API PUBLIQUE
+// ==========================================================
 
 export const ForumAPI = {
   connect,
